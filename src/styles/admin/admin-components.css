@@ -1,0 +1,133 @@
+/* ========== Admin – Reusable Components ========== */
+
+/* ألواح زجاجية */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  transition: var(--transition);
+}
+
+.glass-panel-header {
+  padding: 2rem;
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+}
+
+/* بطاقات عامة */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.admin-stat-card {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.admin-stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.15); }
+.admin-stat-card h3 { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; }
+.admin-stat-card .value { font-size: 1.8rem; font-weight: 700; }
+
+/* أزرار الفلترة */
+.stats-section-filter { display: flex; gap: 8px; flex-wrap: wrap; }
+.stats-filter-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.stats-filter-btn.active,
+.stats-filter-btn:hover {
+  background: rgba(56,130,246,0.2);
+  color: #fff;
+  border-color: rgba(56,130,246,0.4);
+}
+
+/* شارات الحالة */
+.status-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+.status-badge.pending { background: #f59e0b; }
+.status-badge.confirmed { background: #3b82f6; }
+.status-badge.shipped { background: #8b5cf6; }
+.status-badge.delivered { background: #10b981; }
+.status-badge.cancelled { background: #ef4444; }
+
+/* شارة غير المقروءة */
+.unread-badge {
+  background: #ef4444; color: #fff; border-radius: 50%;
+  min-width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: bold; padding: 0 5px; flex-shrink: 0;
+}
+
+/* محمل */
+.loader-spinner {
+  width: 48px; height: 48px;
+  border: 5px solid rgba(255,255,255,0.2);
+  border-bottom-color: var(--accent);
+  border-radius: var(--radius-full);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* نافذة تأكيد */
+.confirm-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+  z-index: 1000; backdrop-filter: blur(4px);
+}
+.confirm-content {
+  max-width: 400px; width: 90%; background: rgba(20,20,40,0.95);
+  backdrop-filter: blur(30px); border-radius: var(--radius-xl);
+  padding: 2rem; text-align: center; border: 1px solid rgba(255,255,255,0.15);
+}
+.confirm-icon { margin-bottom: 1rem; }
+.confirm-title { color: #fff; margin-bottom: 0.5rem; }
+.confirm-text { color: var(--text-secondary); margin-bottom: 1.5rem; }
+.confirm-actions { display: flex; gap: 1rem; justify-content: center; }
+
+/* حقل البحث */
+.search-box { position: relative; }
+.search-box input {
+  width: 100%; padding: 10px 35px 10px 12px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; color: #fff; font-size: 0.9rem; outline: none;
+}
+.search-box .search-icon {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-tertiary);
+}
+
+/* للقراءة فقط */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); border: 0;
+}
+
+/* استجابة للجوال */
+@media (max-width: 768px) {
+  .glass-panel-header { padding: 1.25rem; }
+  .confirm-content { padding: 1.5rem; }
+  .admin-stats { grid-template-columns: 1fr; }
+}

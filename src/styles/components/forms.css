@@ -1,0 +1,50 @@
+/* ========================================
+   Form Components
+   ======================================== */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.form-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-primary);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+}
+
+.form-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

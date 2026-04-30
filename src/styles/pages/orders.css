@@ -1,0 +1,226 @@
+/* ========================================
+   Orders Page - Elegant & Unified
+   ======================================== */
+
+.orders-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* خلفية متحركة متناسقة */
+.orders-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: 
+    radial-gradient(ellipse at 25% 35%, rgba(102, 126, 234, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 65%, rgba(168, 85, 247, 0.06) 0%, transparent 45%);
+  animation: bgDrift 25s linear infinite;
+}
+
+.orders-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  position: relative;
+  z-index: 1;
+}
+
+/* ========== عنوان الصفحة ========== */
+.orders-title {
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--space-8);
+  text-align: center;
+}
+
+/* ========== بطاقة الطلب ========== */
+.order-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-primary);
+  margin-bottom: var(--space-4);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.order-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* رأس البطاقة (قابل للنقر) */
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.order-header:hover {
+  background: var(--bg-card-hover);
+}
+
+.order-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.order-id {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+}
+
+.order-date {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+.order-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.order-total {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--accent);
+}
+
+.order-expand-icon {
+  transition: transform var(--transition-normal);
+  color: var(--text-tertiary);
+  font-size: 1.2rem;
+}
+
+.order-expand-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* ========== تفاصيل الطلب (محتوى قابل للتوسيع) ========== */
+.order-details {
+  padding: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--border-primary);
+  animation: fadeIn 0.3s ease;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.order-item-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.order-item-icon {
+  font-size: 1.3rem;
+}
+
+.order-item-name {
+  font-weight: 500;
+}
+
+.order-item-qty {
+  color: var(--text-tertiary);
+  margin-left: var(--space-1);
+}
+
+.order-item-price {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* جدول التكاليف */
+.order-costs {
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.order-cost-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.order-cost-row.total {
+  border-top: 1px solid var(--border-primary);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  font-weight: 700;
+  color: var(--accent);
+  font-size: var(--font-size-base);
+}
+
+/* معلومات الدفع */
+.order-payment {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* ========== حالة فارغة ========== */
+.orders-empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  color: var(--text-secondary);
+}
+
+.orders-empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-4);
+  opacity: 0.7;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .orders-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .order-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .order-details {
+    padding: var(--space-4);
+  }
+}

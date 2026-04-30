@@ -1,0 +1,39 @@
+/* ========================================
+   Table Components
+   ======================================== */
+
+.table-container {
+  width: 100%;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 16px;
+  background: var(--bg-input);
+  text-align: right;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-primary);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg-card-hover); }

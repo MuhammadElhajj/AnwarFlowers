@@ -1,0 +1,26 @@
+/* Base */
+/* @import './base/variables.css'; */
+/* @import './base/reset.css';
+@import './base/typography.css';
+@import './base/utilities.css'; */
+
+/* Components */
+/* @import './components/buttons.css';
+@import './components/cards.css';
+@import './components/forms.css';
+@import './components/modal.css';
+@import './components/badges.css';
+@import './components/tables.css';
+@import './components/header.css';
+@import './components/sidebar.css'; */
+
+/* Pages */
+/* @import './pages/auth.css';
+@import './pages/dashboard.css';
+@import './pages/products.css';
+@import './pages/cart.css';
+@import './pages/checkout.css';
+@import './pages/profile.css';
+@import './pages/orders.css';
+@import './pages/calculator.css';
+@import './pages/admin.css'; */

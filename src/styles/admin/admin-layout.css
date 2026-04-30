@@ -1,0 +1,308 @@
+/* ========================================
+   Admin Layout – Master File (Fully Responsive)
+   ======================================== */
+
+/* -------- إعادة تعيين -------- */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-main {
+  flex: 1;
+  width: 100%;
+  min-height: 100vh;
+  padding-top: 64px; /* ارتفاع الهيدر الثابت */
+  transition: margin 0.35s;
+}
+
+/* -------- شريط جانبي ثابت -------- */
+.admin-sidebar {
+  position: fixed;
+  top: 64px; /* يبدأ بعد الهيدر مباشرة */
+  right: 0;
+  width: 280px;
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+  background: rgba(15, 15, 25, 0.8);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -5px 0 35px rgba(0, 0, 0, 0.5);
+}
+
+.admin-sidebar.open {
+  transform: translateX(0);
+}
+
+/* -------- محتوى الشريط الجانبي -------- */
+.admin-sidebar-logo {
+  text-align: center;
+  padding: 0 1.5rem 1.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 0.5rem;
+}
+
+.admin-sidebar-logo h2 { color: #fff; font-size: 1.3rem; margin: 0; font-weight: 700; }
+.admin-sidebar-logo span { color: var(--text-tertiary, #94a3b8); font-size: 0.75rem; }
+
+.admin-sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 0.75rem;
+  overflow-y: auto;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: right;
+  font-weight: 500;
+}
+
+.admin-nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.admin-nav-item.active {
+  background: linear-gradient(135deg, rgba(56,130,246,0.25), rgba(168,85,247,0.2));
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(56,130,246,0.25);
+  font-weight: 600;
+}
+
+/* -------- الهيدر (ثابت بعرض كامل) -------- */
+.admin-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 64px;
+  z-index: 1200;
+  background: rgba(15, 15, 25, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+}
+
+.admin-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  gap: 1rem;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-header .admin-hamburger {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  padding: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.admin-header .admin-hamburger:hover { background: rgba(255, 255, 255, 0.15); }
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.admin-logo-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.admin-logo-sub {
+  font-size: 0.7rem;
+  color: var(--text-tertiary, #94a3b8);
+}
+
+.admin-page-title {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  padding-right: 1.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-header-icon {
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.admin-header-icon:hover { background: rgba(255, 255, 255, 0.08); }
+
+.admin-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.admin-user-info span {
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* -------- الخلفية والهامبرغر -------- */
+.admin-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  z-index: 1090;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.admin-sidebar-overlay.show { opacity: 1; visibility: visible; }
+
+/* -------- استجابة الجوال -------- */
+@media (max-width: 768px) {
+  .admin-main {
+    margin-right: 0 !important;
+    padding: 64px 0 0 0; /* لا هوامش جانبية */
+  }
+
+  .admin-header .admin-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-page-title {
+    display: none;
+  }
+
+  .admin-logo-text {
+    font-size: 1rem;
+  }
+
+  .admin-user-info {
+    display: none;
+  }
+
+  .admin-sidebar {
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: 300px;
+    transform: translateX(100%);
+    border-radius: 24px 0 0 24px;
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* -------- سطح المكتب -------- */
+@media (min-width: 769px) {
+  .admin-main {
+    margin-right: 280px; /* يفسح مجالاً للشريط الجانبي */
+    padding: 64px 2rem 2rem 2rem;
+  }
+
+  .admin-sidebar {
+    transform: translateX(0);
+    border-radius: 0;
+    pointer-events: auto;
+  }
+
+  .admin-header .admin-hamburger {
+    display: none;
+  }
+
+  .admin-sidebar-overlay {
+    display: none;
+  }
+}
+
