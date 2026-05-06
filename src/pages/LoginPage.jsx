@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
-import heroLogo from '../assets/hero.jpg';
+// import heroLogo from '../assets/hero.jpg';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -52,7 +52,7 @@ export default function LoginPage() {
       <div className="auth-card">
        <div className="auth-header">
   <div className="auth-logo-container">
-    <img src={heroLogo} alt="Logo" className="auth-logo-img" />
+    {/* <img src={heroLogo} alt="Logo" className="auth-logo-img" /> */}
   </div>
   {/* <h1 className="auth-title">{t('appName')}</h1> */}
   <h1 className="auth-title">Anwar Flowers Shop</h1>
