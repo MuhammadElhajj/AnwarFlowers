@@ -1,97 +1,100 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { useLanguage } from '../contexts/LanguageContext'
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+
+import heroLogo from '../assets/hero.jpg';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const { login, loginWithGoogle } = useAuth()
-  const { t } = useLanguage()
-  const navigate = useNavigate()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { login, loginWithGoogle } = useAuth();
+  const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      const ok = await login(email, password)
+      const ok = await login(email, password);
       if (ok) {
-        navigate('/dashboard')
+        navigate('/dashboard');
       } else {
-        setError('بيانات الدخول غير صحيحة أو حسابك غير مفعل.')
+        setError('بيانات الدخول غير صحيحة أو حسابك غير مفعل.');
       }
     } catch (err) {
-      setError(err.message || 'حدث خطأ. حاول مرة أخرى.')
+      setError(err.message || 'حدث خطأ. حاول مرة أخرى.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleGoogleLogin = async () => {
-    setError('')
-    setLoading(true)
+    setError('');
+    setLoading(true);
     try {
-      const ok = await loginWithGoogle()
-      setLoading(false)
+      const ok = await loginWithGoogle();
+      setLoading(false);
       if (ok) {
-        navigate('/dashboard')
+        navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'فشل تسجيل الدخول بحساب Google')
-      setLoading(false)
+      setError(err.message || 'فشل تسجيل الدخول بحساب Google');
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-header">
-          <div className="auth-logo">🌸</div>
-          <h1 className="auth-title">{t('appName')}</h1>
-          <p className="auth-subtitle">{t('loginTitle')}</p>
-        </div>
-        
+       <div className="auth-header">
+  <div className="auth-logo-container">
+    <img src={heroLogo} alt="Logo" className="auth-logo-img" />
+  </div>
+  {/* <h1 className="auth-title">{t('appName')}</h1> */}
+  <h1 className="auth-title">Anwar Flowers Shop</h1>
+  <p className="auth-subtitle">تسجيل الدخول للمتابعة</p>
+</div>
+
         {error && <div className="auth-error">{error}</div>}
-        
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="auth-input-group">
             <label className="auth-label">{t('email')}</label>
-            <input 
-              type="email" 
-              className="auth-input" 
+            <input
+              type="email"
+              className="auth-input"
               placeholder="example@email.com"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               disabled={loading}
             />
           </div>
           <div className="auth-input-group">
             <label className="auth-label">{t('password')}</label>
-            <input 
-              type="password" 
-              className="auth-input" 
+            <input
+              type="password"
+              className="auth-input"
               placeholder="••••••••"
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               disabled={loading}
             />
           </div>
           <button type="submit" className="auth-submit-btn" disabled={loading}>
-            {loading ? '⏳ جاري الدخول...' : `🌸 ${t('loginButton')}`}
+            {loading ? '⏳ جاري الدخول...' : '🌸 تسجيل الدخول'}
           </button>
         </form>
 
-        {/* divider */}
         <div className="auth-divider">
           <span className="auth-divider-text">أو</span>
         </div>
 
-        {/* زر Google */}
         <button
           type="button"
           onClick={handleGoogleLogin}
@@ -109,11 +112,11 @@ export default function LoginPage() {
 
         <div className="auth-footer">
           <p className="auth-footer-text">
-            {t('noAccount')}{' '}
-            <Link to="/register" className="auth-link">{t('createAccount')}</Link>
+            ليس لديك حساب؟{' '}
+            <Link to="/register" className="auth-link">إنشاء حساب جديد</Link>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

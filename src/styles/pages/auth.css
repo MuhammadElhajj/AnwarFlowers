@@ -1,215 +1,164 @@
 /* ========================================
-   Auth Pages - Login & Register Styles
+   Login Page – Instagram-Inspired Design
    ======================================== */
 
 .auth-page {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: var(--gradient-bg);
-  padding: var(--space-5);
+  justify-content: center;
+  background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 100%);
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
+/* خلفية ديناميكية */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 50%, rgba(255, 105, 180, 0.15), transparent 50%),
+              radial-gradient(circle at 70% 20%, rgba(168, 85, 247, 0.1), transparent 50%);
+  animation: rotateBg 20s linear infinite;
+  z-index: 0;
+}
+
+@keyframes rotateBg {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* الكرت الرئيسي */
 .auth-card {
-  background: var(--bg-card);
-  backdrop-filter: var(--glass-blur-strong);
-  border-radius: var(--radius-2xl);
-  padding: var(--space-10);
   width: 100%;
-  max-width: 420px;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border-primary);
-  animation: fadeInUp 0.5s ease;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.5s ease;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* الهيدر */
 .auth-header {
   text-align: center;
-  margin-bottom: var(--space-8);
+  margin-bottom: 2rem;
 }
 
 .auth-logo {
-  font-size: 60px;
-  margin-bottom: var(--space-3);
-  display: inline-block;
-  animation: float 3s ease-in-out infinite;
+  font-size: 3.5rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
 }
 
 .auth-title {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-extrabold);
-  color: var(--text-primary);
-  margin-bottom: var(--space-2);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .auth-subtitle {
-  color: var(--text-secondary);
-  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
 }
 
+/* رسالة الخطأ */
+.auth-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  text-align: center;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* النموذج */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 1rem;
 }
 
 .auth-input-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 0.4rem;
 }
 
 .auth-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin-right: 4px;
 }
 
 .auth-input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 2px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  font-size: 0.95rem;
   outline: none;
-  transition: all var(--transition-fast);
-  background: var(--bg-input);
-  color: var(--text-primary);
-  font-family: var(--font-family);
+  transition: border-color 0.2s, background 0.2s;
 }
 
 .auth-input:focus {
-  border-color: var(--link-color);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-  background: var(--bg-card);
+  border-color: #ff69b4;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .auth-input::placeholder {
-  color: var(--text-tertiary);
+  color: rgba(255, 255, 255, 0.4);
 }
 
+/* زر تسجيل الدخول */
 .auth-submit-btn {
-  width: 100%;
-  padding: 15px;
-  background: var(--gradient-primary);
-  color: var(--btn-primary-text);
+  background: linear-gradient(135deg, #ff69b4, #a855f7);
   border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+  border-radius: 12px;
+  padding: 0.9rem;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all var(--transition-normal);
-  margin-top: var(--space-2);
-  box-shadow: var(--shadow-btn-primary);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 0.5rem;
 }
 
-.auth-submit-btn:hover {
+.auth-submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
-}
-
-.auth-submit-btn:active {
-  transform: translateY(0);
+  box-shadow: 0 10px 25px rgba(255, 105, 180, 0.3);
 }
 
 .auth-submit-btn:disabled {
-  background: var(--text-tertiary);
+  opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
-.auth-footer {
-  text-align: center;
-  margin-top: var(--space-6);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-primary);
-}
-
-.auth-footer-text {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-.auth-link {
-  color: var(--link-color);
-  font-weight: var(--font-weight-bold);
-  text-decoration: none;
-  transition: all var(--transition-fast);
-}
-
-.auth-link:hover {
-  text-decoration: underline;
-}
-
-.auth-error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--danger);
-  color: var(--danger);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  text-align: center;
-  margin-bottom: var(--space-3);
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-/* ========== Google Login Button ========== */
-.auth-google-btn {
-  width: 100%;
-  padding: 14px;
-  background: #ffffff;
-  color: #444;
-  border: 1px solid #dadce0;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  font-family: var(--font-family);
-}
-
-.auth-google-btn:hover {
-  background: #f8f9fa;
-  border-color: #c5cae9;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  transform: translateY(-1px);
-}
-
-.auth-google-btn:active {
-  background: #eee;
-  transform: translateY(0);
-}
-
-.auth-google-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.auth-google-icon {
-  flex-shrink: 0;
-}
-
-/* ========== Divider ========== */
+/* الفاصل */
 .auth-divider {
   display: flex;
   align-items: center;
-  margin: 16px 0;
-  color: var(--text-tertiary);
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .auth-divider::before,
@@ -217,11 +166,113 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--border-primary);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .auth-divider-text {
-  margin: 0 12px;
-  font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
+  font-size: 0.85rem;
+}
+
+/* زر Google */
+.auth-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auth-google-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-google-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-google-icon {
+  flex-shrink: 0;
+}
+
+/* تذييل */
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.auth-footer-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+}
+
+.auth-link {
+  color: #ff69b4;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.auth-link:hover {
+  color: #ff85c6;
+}
+
+/* ========== استجابة الجوال (شاشة كاملة) ========== */
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .auth-card {
+    max-width: 100%;
+    border-radius: 0;
+    padding: 3rem 1.5rem 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(25px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+  }
+}
+
+/* صورة اللوغو */
+.auth-logo-container {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.auth-logo-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* تحسين العنوان */
+.auth-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.3rem 0;
+  letter-spacing: -0.5px;
+}
+
+.auth-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  margin: 0;
 }
