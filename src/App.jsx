@@ -3,7 +3,7 @@ import { useAuth } from './contexts/AuthContext';
 import { useAdmin } from './contexts/AdminContext';
 import Footer from './components/Layout/Footer';
 import MobileBottomNav from './components/Layout/MobileBottomNav';
-import ChatFloatingButton from './components/Layout/ChatFloatingButton'; // أيقونة الدردشة العائمة
+
 
 // User Pages
 import LoginPage from './pages/LoginPage';
@@ -15,7 +15,6 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import ProfilePage from './pages/ProfilePage';
-import CalculatorPage from './pages/CalculatorPage';
 import ChatPage from './pages/ChatPage';
 
 // Admin Pages
@@ -26,8 +25,8 @@ import AdminOrdersPage from './pages/AdminOrdersPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminChatPage from './components/Admin/AdminChatPage';
-import AdminAddonsPage from './components/Admin/AdminAddonsPage'; // ✅ صفحة الإضافات
-import AdminNotificationsPage from './components/Admin/AdminNotificationsPage'; // ✅ صفحة الإشعارات
+import AdminAddonsPage from './components/Admin/AdminAddonsPage';
+import AdminNotificationsPage from './components/Admin/AdminNotificationsPage';
 
 // ========== Styles ==========
 import './styles/base/variables.css';
@@ -42,15 +41,14 @@ import './styles/components/badges.css';
 import './styles/components/tables.css';
 import './styles/components/header.css';
 import './styles/components/sidebar.css';
-import './styles/pages/auth.css';
-// import './styles/pages/login.css';
+// import './styles/pages/auth.css';
+import './styles/pages/login.css';
 import './styles/pages/dashboard.css';
 import './styles/pages/products.css';
 import './styles/pages/cart.css';
 import './styles/pages/checkout.css';
 import './styles/pages/profile.css';
 import './styles/pages/orders.css';
-import './styles/pages/calculator.css';
 import './styles/admin/admin-base.css';
 import './styles/admin/admin-layout.css';
 import './styles/admin/admin-components.css';
@@ -101,7 +99,6 @@ export default function App() {
         <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
         <Route path="/my-orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/calculator" element={<ProtectedRoute><CalculatorPage /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
         {/* Admin */}
@@ -112,15 +109,15 @@ export default function App() {
         <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
         <Route path="/admin/chat" element={<AdminRoute><AdminChatPage /></AdminRoute>} />
-        <Route path="/admin/addons" element={<AdminRoute><AdminAddonsPage /></AdminRoute>} /> {/* ✅ جديد */}
-        <Route path="/admin/notifications" element={<AdminRoute><AdminNotificationsPage /></AdminRoute>} /> {/* ✅ جديد */}
+        <Route path="/admin/addons" element={<AdminRoute><AdminAddonsPage /></AdminRoute>} />
+        <Route path="/admin/notifications" element={<AdminRoute><AdminNotificationsPage /></AdminRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      {/* أيقونة الدردشة العائمة تظهر للمستخدمين المسجلين فقط وليس في لوحة المدير */}
-      {user && !isAdminPath && <ChatFloatingButton />}
+      {/* أيقونة الشات العائمة فقط (تمت إزالة زر الدعم لأنه أصبح في الهيدر) */}
+     
 
       {showBottomNav && <MobileBottomNav />}
     </>

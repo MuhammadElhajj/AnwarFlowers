@@ -3,10 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
-import { useNotifications } from '../../contexts/NotificationContext'; // ✅ استيراد الإشعارات
+import { useNotifications } from '../../contexts/NotificationContext';
 import {
   FiShoppingCart, FiUser, FiLogOut, FiMoon, FiSun, FiPackage,
-  FiGrid, FiList, FiBell, FiCheck
+  FiGrid, FiList, FiBell, FiCheck, FiHeadphones
 } from 'react-icons/fi';
 import heroLogo from '../../assets/hero.jpg';
 
@@ -14,15 +14,15 @@ export default function Header() {
   const { user, logout } = useAuth();
   const { t, lang, setLang } = useLanguage();
   const { cartCount } = useCart();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(); // ✅
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const [showMenu, setShowMenu] = useState(false);
-  const [showNotif, setShowNotif] = useState(false); // ✅ حالة إظهار قائمة الإشعارات
+  const [showNotif, setShowNotif] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(true);
 
-  const notifRef = useRef(null); // ✅ لإغلاق القائمة عند النقر خارجها
+  const notifRef = useRef(null);
 
   // إغلاق قائمة الإشعارات عند النقر خارجها
   useEffect(() => {
@@ -46,8 +46,8 @@ export default function Header() {
   const navItems = [
     { path: '/dashboard', icon: <FiGrid size={16} />, label: t('dashboard') },
     { path: '/products', icon: <FiPackage size={16} />, label: t('products') },
-    { path: '/calculator', icon: '🧮', label: 'الحاسبة' },
     { path: '/my-orders', icon: <FiList size={16} />, label: t('orders') },
+    { path: '/chat', icon: <FiHeadphones size={16} />, label: 'الدعم' },
   ];
 
   return (
@@ -65,8 +65,11 @@ export default function Header() {
 
         <nav className="header-nav">
           {navItems.map(item => (
-            <button key={item.path} onClick={() => navigate(item.path)}
-              className={`header-nav-btn ${isActive(item.path) ? 'active' : ''}`}>
+            <button
+              key={item.path || item.label}
+              onClick={() => navigate(item.path)}
+              className={`header-nav-btn ${item.path && isActive(item.path) ? 'active' : ''}`}
+            >
               {item.icon} {item.label}
             </button>
           ))}
@@ -79,7 +82,7 @@ export default function Header() {
             <option value="en">en</option>
           </select>
 
-          {/* ✅ زر الإشعارات (جنب السلة) */}
+          {/* زر الإشعارات */}
           <div className="notification-wrapper" ref={notifRef}>
             <button
               className="header-icon-btn notification-bell"

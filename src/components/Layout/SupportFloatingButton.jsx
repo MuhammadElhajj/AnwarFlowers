@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { BsChatDotsFill } from 'react-icons/bs'; // أو FiMessageCircle
 import '../../styles/components/ChatFloatingButton.css';
 
-export default function ChatFloatingButton() {
+export default function SupportFloatingButton() {
   const navigate = useNavigate();
 
   return (

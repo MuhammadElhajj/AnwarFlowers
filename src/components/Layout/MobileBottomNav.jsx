@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCart } from '../../contexts/CartContext';
-import { FiHome, FiPackage, FiShoppingCart, FiList } from 'react-icons/fi';
+import { FiHome, FiPackage, FiShoppingCart, FiList, FiHeadphones } from 'react-icons/fi';
 
 export default function MobileBottomNav() {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function MobileBottomNav() {
     { path: '/products', icon: <FiPackage size={20} />, label: t('products') },
     { path: '/cart', icon: <FiShoppingCart size={20} />, label: t('cart'), badge: cartCount() },
     { path: '/my-orders', icon: <FiList size={20} />, label: t('orders') },
-    { path: '/calculator', icon: <span className="nav-emoji">🧮</span>, label: 'الحاسبة' },
+    { path: '/chat', icon: <FiHeadphones size={20} />, label: 'الدعم' },
   ];
 
   return (

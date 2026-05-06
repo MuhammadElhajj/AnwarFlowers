@@ -268,7 +268,7 @@
 /* --- توحيد صورة المنتج في كروت المستخدم --- */
 .product-image {
   width: 100%;
-  height: 260px;           /* ارتفاع ثابت لجميع الكروت */
+  height: 200px;           /* ارتفاع ثابت لجميع الكروت */
   overflow: hidden;
   border-radius: 12px;
   position: relative;
