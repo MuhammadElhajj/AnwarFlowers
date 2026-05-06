@@ -65,13 +65,9 @@
   justify-content: center;
 }
 
-.admin-sidebar {
-  /* ... نفس السابق */
-}
 
-.admin-nav-item {
-  /* ... */
-}
+
+
 
 .avatar-placeholder {
   width: 40px; height: 40px; border-radius: 50%;
