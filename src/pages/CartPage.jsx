@@ -9,7 +9,6 @@ import {
 import Header from '../components/Layout/Header';
 import Sidebar from '../components/Layout/Sidebar';
 import { FiTrash2, FiMinus, FiPlus } from 'react-icons/fi';
-import PaymentModal from '../components/Cart/PaymentModal';
 
 export default function CartPage() {
   const { t } = useLanguage();
@@ -23,7 +22,7 @@ export default function CartPage() {
     addonsList
   } = useCart();
   const navigate = useNavigate();
-  const [showPayment, setShowPayment] = useState(false);
+ 
 
   const costs = calculateCost();
 
@@ -215,7 +214,7 @@ export default function CartPage() {
                   </div>
                 )}
                 <div className="summary-total"><span>المجموع</span><span>${costs.total}</span></div>
-                <button className="checkout-btn" onClick={() => setShowPayment(true)}>
+                <button className="checkout-btn" onClick={() => navigate('/checkout')}>
                   💳 متابعة الدفع
                 </button>
               </div>
@@ -224,8 +223,6 @@ export default function CartPage() {
         </div>
         <Sidebar />
       </div>
-
-      {showPayment && <PaymentModal total={costs.total} onClose={() => setShowPayment(false)} />}
     </div>
   );
 }
