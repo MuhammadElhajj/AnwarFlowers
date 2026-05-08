@@ -1,4 +1,5 @@
 const ar = {
+  // عام
   appName: 'متجر بوكيهات أنور',
   welcome: 'مرحباً بك',
   login: 'تسجيل الدخول',
@@ -38,5 +39,64 @@ const ar = {
   noData: 'لا توجد بيانات',
   success: 'تم بنجاح',
   error: 'حدث خطأ',
+
+  // إشعارات
+  notifications: 'الإشعارات',
+  noNotifications: 'لا توجد إشعارات',
+  markAllRead: 'تعليم الكل مقروء',
+  markRead: 'تعليم كمقروء',
+  orderStatusUpdated: 'تم تحديث حالة الطلب',
+  newOrder: 'طلب جديد',
+
+  // كوبونات
+  coupons: 'الكوبونات',
+  availableCoupons: 'الكوبونات المتاحة',
+  noCoupons: 'لا توجد كوبونات متاحة',
+  applyCoupon: 'تطبيق الكوبون',
+  couponApplied: 'تم تطبيق الكوبون',
+  invalidCoupon: 'الكوبون غير صالح',
+
+  // سلة
+  emptyCart: 'السلة فارغة',
+  browseProducts: 'تصفح المنتجات',
+  orderSummary: 'ملخص الطلب',
+  subtotal: 'المنتجات',
+  delivery: 'التوصيل',
+  wrapping: 'التغليف',
+  tax: 'الضريبة',
+  addons: 'الإضافات',
+  customization: 'التخصيص',
+  message: 'رسالة',
+  wrappingColor: 'لون ورق التغليف',
+  messageColor: 'لون الكتابة',
+  messagePlacement: 'مكان الكتابة',
+  proceedToPayment: 'متابعة الدفع',
+
+  // دردشة
+  chat: 'الدردشة',
+  support: 'الدعم',
+  typeMessage: 'اكتب رسالتك...',
+  send: 'إرسال',
+  online: 'متصل الآن',
+
+  // أخرى
+  calculator: 'الحاسبة',
+  all: 'الكل',
+  today: 'اليوم',
+  week: 'هذا الأسبوع',
+  month: 'هذا الشهر',
+  pending: 'قيد التجهيز',
+  confirmed: 'تم التأكيد',
+  shipped: 'تم الشحن',
+  delivered: 'تم التوصيل',
+  cancelled: 'ملغي',
+  points: 'نقطة',
+  level: 'مستوى',
+  ordersCount: 'طلبات',
+  revenue: 'الإيرادات',
+  users: 'المستخدمين',
+  admin: 'المدير',
+  adminPanel: 'لوحة التحكم',
 };
+
 export default ar;

@@ -347,3 +347,119 @@
   font-size: 14px;
 }
 
+
+
+/* ========== أيقونة اللغة - تصميم ناري ========== */
+.language-switcher {
+  position: relative;
+}
+
+/* زر العلم الأساسي */
+.lang-btn {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-btn:hover {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(102, 126, 234, 0.15));
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  transform: translateY(-1px);
+}
+
+.current-lang-flag {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* القائمة المنسدلة */
+.lang-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  background: rgba(20, 20, 40, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 8px;
+  min-width: 180px;
+  z-index: 1001;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(168, 85, 247, 0.2);
+  animation: dropdownIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top right;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* أيقونة اللغة داخل القائمة */
+.lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.lang-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(180deg, #a855f7, #667eea);
+  border-radius: 0 4px 4px 0;
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.lang-item:hover::before {
+  transform: scaleY(1);
+}
+
+.lang-item:hover {
+  background: rgba(168, 85, 247, 0.15);
+  padding-left: 18px;
+}
+
+.lang-item.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(102, 126, 234, 0.2));
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+}
+
+.lang-item.active::before {
+  transform: scaleY(1);
+}
+
+.lang-item span {
+  font-size: 1.3rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}

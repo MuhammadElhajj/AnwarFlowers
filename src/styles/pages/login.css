@@ -276,3 +276,122 @@
   font-size: 0.9rem;
   margin: 0;
 }
+
+/* زر تبديل اللغة في الزاوية */
+.register-lang-switcher {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.register-lang-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 14px;
+  padding: 8px 12px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+}
+
+.register-lang-btn:hover {
+  background: rgba(168,85,247,0.2);
+  border-color: rgba(168,85,247,0.5);
+}
+
+.current-lang-flag {
+  font-size: 1.4rem;
+}
+
+.register-lang-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: rgba(20,20,40,0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 8px;
+  min-width: 150px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  animation: dropdownIn 0.3s ease;
+}
+
+.register-lang-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.register-lang-item:hover {
+  background: rgba(168,85,247,0.15);
+}
+
+.register-lang-item.active {
+  background: rgba(168,85,247,0.25);
+  font-weight: 600;
+}
+
+/* ========== Full Screen Registration Page ========== */
+.auth-page-full {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.auth-card-fixed {
+  max-width: 500px;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* جعل النموذج يملأ المساحة المتاحة */
+.auth-card-fixed .auth-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-card-fixed .auth-input-group {
+  margin-bottom: 0;
+}
+
+/* تقليل المسافات لتناسب الشاشات الصغيرة */
+@media (max-height: 700px) {
+  .auth-card-fixed {
+    padding: 1.5rem 1rem;
+  }
+  
+  .auth-card-fixed .auth-header {
+    margin-bottom: 1rem;
+  }
+  
+  .auth-card-fixed .auth-input-group {
+    gap: 0.2rem;
+  }
+  
+  .auth-card-fixed .auth-input {
+    padding: 0.6rem 0.8rem;
+  }
+}
