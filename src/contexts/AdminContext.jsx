@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { 
-  collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp, getDoc
-} from 'firebase/firestore';  // ← أضفنا getDoc هنا فقط
+  collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
+  query, orderBy, serverTimestamp, getDoc
+} from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from './AuthContext';
+import emailjs from '@emailjs/browser'; // ✅ لاستدعاء EmailJS
 import toast from 'react-hot-toast';
 
 const AdminContext = createContext(null);
@@ -25,7 +27,6 @@ export function AdminProvider({ children }) {
   // تحميل البيانات من Firestore عند بدء التشغيل
   useEffect(() => {
     const loadAdminData = async () => {
-      // لا تحمل شيئًا إذا لم يكن هناك مستخدم مسجل كمدير
       if (!user || user.role !== 'admin') {
         setLoading(false);
         return;
@@ -34,18 +35,15 @@ export function AdminProvider({ children }) {
       setAdmin(user);
       setLoading(true);
       try {
-        // جلب المنتجات
         const productsSnap = await getDocs(collection(db, 'products'));
         const productsList = productsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setProducts(productsList);
 
-        // جلب الطلبات مرتبة حسب التاريخ
         const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
         const ordersSnap = await getDocs(ordersQuery);
         const ordersList = ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setOrders(ordersList);
 
-        // جلب المستخدمين
         const usersSnap = await getDocs(collection(db, 'users'));
         const usersList = usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setUsers(usersList);
@@ -60,7 +58,7 @@ export function AdminProvider({ children }) {
     loadAdminData();
   }, [user]);
 
-  // دوال إدارة المنتجات
+  // دوال المنتجات (كما هي بدون تغيير)
   const addProduct = async (product) => {
     try {
       const docRef = await addDoc(collection(db, 'products'), {
@@ -97,7 +95,7 @@ export function AdminProvider({ children }) {
     }
   };
 
-  // إدارة الطلبات
+  // إدارة الطلبات – مع إضافة البريد الإلكتروني
   const updateOrderStatus = async (orderId, status) => {
     try {
       const statusMap = {
@@ -111,24 +109,39 @@ export function AdminProvider({ children }) {
       await updateDoc(orderRef, { status, statusText: statusMap[status] || status });
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status, statusText: statusMap[status] } : o));
 
-      // ✅ إنشاء إشعار للمستخدم صاحب الطلب
-      try {
-        const orderSnap = await getDoc(orderRef);
-        if (orderSnap.exists()) {
-          const orderData = orderSnap.data();
-          if (orderData.userId) {
-            const shortId = orderId.slice(0, 8);
-            await addDoc(collection(db, 'notifications'), {
-              userId: orderData.userId,
-              message: `📋 طلبك #${shortId} أصبح "${statusMap[status] || status}"`,
-              orderId: orderId,
-              read: false,
-              createdAt: serverTimestamp()
-            });
+      // ✅ إنشاء إشعار + إرسال إيميل
+      const orderSnap = await getDoc(orderRef);
+      if (orderSnap.exists()) {
+        const orderData = orderSnap.data();
+        if (orderData.userId) {
+          const shortId = orderId.slice(0, 8);
+          
+          // 1. إشعار داخل التطبيق
+          await addDoc(collection(db, 'notifications'), {
+            userId: orderData.userId,
+            message: `📋 طلبك #${shortId} أصبح "${statusMap[status] || status}"`,
+            orderId: orderId,
+            read: false,
+            createdAt: serverTimestamp()
+          });
+
+          // 2. إرسال بريد إلكتروني
+          const customer = users.find(u => u.id === orderData.userId);
+          if (customer?.email) {
+            emailjs.send(
+              'service_2zwpqdx',          // Service ID
+              'template_g2tmiql',         // Template ID
+              {
+                to_email: customer.email,
+                user_name: customer.firstName || 'مستخدم',
+                message: `حالة طلبك #${shortId} أصبحت "${statusMap[status] || status}"`,
+                order_id: shortId,
+                site_name: 'Anwar Flowers'
+              },
+              'cDwT_2Gu-ExzAw6js'         // Public Key
+            ).catch(e => console.warn('تعذر إرسال البريد الإلكتروني', e));
           }
         }
-      } catch (notifErr) {
-        console.warn('فشل إنشاء الإشعار، لكن الطلب تم تحديثه:', notifErr);
       }
 
       toast.success('تم تحديث حالة الطلب');
@@ -147,7 +160,7 @@ export function AdminProvider({ children }) {
     }
   };
 
-  // إدارة المستخدمين
+  // إدارة المستخدمين (بدون تغيير)
   const toggleUserBlock = async (userId, blocked) => {
     try {
       const userRef = doc(db, 'users', userId);
@@ -168,7 +181,7 @@ export function AdminProvider({ children }) {
     }
   };
 
-  // الإحصائيات (تعتمد على الحالة المحلية)
+  // الإحصائيات (دون تعديل)
   const getStats = () => ({
     totalOrders: orders.length,
     pendingOrders: orders.filter(o => o.status === 'pending').length,

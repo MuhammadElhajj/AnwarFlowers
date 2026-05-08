@@ -11,6 +11,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from '../services/firebase';
+import emailjs from '@emailjs/browser'; // ✅ استيراد EmailJS
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
@@ -21,11 +22,25 @@ export function useAuth() {
   return context;
 }
 
+// ✅ دالة إرسال إيميل ترحيبي (تُستخدم داخلياً)
+const sendWelcomeEmail = (email, firstName) => {
+  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_2zwpqdx';
+  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_xxxxxxxx';
+  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'user_xxxxxxxxxxxxxxxx';
+
+  emailjs.send(serviceId, templateId, {
+    to_email: email,
+    user_name: firstName || 'مستخدم',
+    message: 'شكراً لانضمامك إلى متجرنا! نتمنى لك تجربة ممتعة 🌸',
+    site_name: 'Anwar Flowers',
+    order_id: ''
+  }, publicKey).catch(e => console.warn('فشل إرسال الإيميل الترحيبي', e));
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ مراقبة حالة المستخدم من Firebase Auth (محسّنة)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -35,10 +50,8 @@ export function AuthProvider({ children }) {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             finalUser = { ...firebaseUser, ...userData };
-            // تخزين role في localStorage كنسخة احتياطية
             localStorage.setItem('userRole', userData.role || 'user');
           } else {
-            // إنشاء وثيقة جديدة للمستخدم إذا لم تكن موجودة
             const newUserData = {
               firstName: firebaseUser.displayName?.split(' ')[0] || 'مستخدم',
               lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
@@ -59,7 +72,6 @@ export function AuthProvider({ children }) {
           setUser(finalUser);
         } catch (err) {
           console.warn('فشل جلب بيانات Firestore، استخدام بيانات Auth الأساسية:', err);
-          // في حالة الفشل، نستخدم localStorage كحل أخير
           const role = localStorage.getItem('userRole') || 'user';
           setUser({ ...firebaseUser, role });
         }
@@ -72,7 +84,6 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // ✅ تسجيل الدخول بحساب Google (محسّن)
   const loginWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -94,6 +105,8 @@ export function AuthProvider({ children }) {
           ordersCount: 0,
           createdAt: new Date().toISOString()
         });
+        // ✅ إرسال إيميل ترحيبي للمستخدم الجديد عبر Google
+        sendWelcomeEmail(result.user.email, result.user.displayName?.split(' ')[0]);
       } else {
         await setDoc(userRef, { lastLogin: new Date().toISOString() }, { merge: true });
       }
@@ -109,7 +122,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ✅ إنشاء حساب بالبريد وكلمة المرور
   const register = async (firstName, lastName, email, password) => {
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
@@ -128,6 +140,10 @@ export function AuthProvider({ children }) {
         createdAt: new Date().toISOString()
       });
       await sendEmailVerification(result.user);
+
+      // ✅ إرسال إيميل ترحيبي بعد التسجيل بالبريد
+      sendWelcomeEmail(email, firstName);
+
       toast.success('تم إنشاء الحساب. يرجى التحقق من بريدك الإلكتروني.');
       return { needVerification: true, email };
     } catch (err) {
@@ -136,7 +152,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ✅ تسجيل الدخول بالبريد وكلمة المرور
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);

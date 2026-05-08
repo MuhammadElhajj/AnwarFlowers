@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
-import AdminHeader from './AdminHeader'; // ✅ الهيدر الجديد
+import AdminHeader from './AdminHeader';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
+import emailjs from '@emailjs/browser'; // ✅ استيراد EmailJS
 import toast from 'react-hot-toast';
 import { FiSearch, FiSend, FiUser, FiBell } from 'react-icons/fi';
 
@@ -49,7 +50,7 @@ export default function AdminNotificationsPage() {
     }
   }, [searchTerm, users]);
 
-  // إرسال الإشعار
+  // ✅ إرسال الإشعار (مع الإيميل)
   const sendNotification = async () => {
     if (!selectedUser || !message.trim()) {
       toast.error('الرجاء اختيار مستخدم وكتابة رسالة');
@@ -57,6 +58,7 @@ export default function AdminNotificationsPage() {
     }
     setSending(true);
     try {
+      // 1. إضافة الإشعار إلى Firestore
       await addDoc(collection(db, 'notifications'), {
         userId: selectedUser,
         message: message.trim(),
@@ -64,7 +66,24 @@ export default function AdminNotificationsPage() {
         read: false,
         createdAt: serverTimestamp(),
       });
-      toast.success('✅ تم إرسال الإشعار بنجاح');
+
+      // 2. إرسال إيميل للمستخدم
+      const selectedUserData = users.find(u => u.id === selectedUser);
+      if (selectedUserData?.email) {
+        emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_2zwpqdx',
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_g2tmiql',
+          {
+            to_email: selectedUserData.email,
+            user_name: selectedUserData.displayName || 'مستخدم',
+            message: message.trim(),
+            site_name: 'Anwar Flowers'
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'cDwT_2Gu-ExzAw6js'
+        ).catch(e => console.warn('فشل إرسال الإيميل', e));
+      }
+
+      toast.success('✅ تم إرسال الإشعار والإيميل بنجاح');
       setMessage('');
       setSelectedUser('');
     } catch (err) {
@@ -81,7 +100,7 @@ export default function AdminNotificationsPage() {
     <div className="admin-layout">
       <AdminSidebar />
       <div className="admin-main">
-        <AdminHeader />  {/* ✅ الهيدر هنا */}
+        <AdminHeader />
 
         <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
