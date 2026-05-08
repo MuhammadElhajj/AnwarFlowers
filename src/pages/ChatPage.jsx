@@ -3,17 +3,19 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   collection, addDoc, query, orderBy, onSnapshot,
   doc, updateDoc, serverTimestamp, getDoc, getDocs,
-  where, increment // ✅ استيراد increment
+  where, increment
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import Header from '../components/Layout/Header';
-import { FiSend, FiSmile } from 'react-icons/fi';
-import '../styles/pages/chat.css'
+import { FiSend, FiSmile, FiArrowLeft } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import '../styles/pages/chat.css';
 
 const EMOJI_LIST = ['😀','😂','😍','😢','😡','👍','👎','❤️','🔥','🎉','🌸','😎','🥳','😭','😅','🤔','🙏','💪','✨','🌟'];
 
 export default function ChatPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState('');
   const [chatId, setChatId] = useState(null);
@@ -22,7 +24,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // ✅ إنشاء الدردشة فوراً (حل موثوق)
+  // إنشاء الدردشة فوراً عند وجود المستخدم
   useEffect(() => {
     if (!user) return;
     const initChat = async () => {
@@ -49,7 +51,7 @@ export default function ChatPage() {
     initChat();
   }, [user]);
 
-  // معلومات المدير (اختياري)
+  // معلومات المدير
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
@@ -67,7 +69,7 @@ export default function ChatPage() {
     fetchAdmin();
   }, []);
 
-  // الاشتراك في الرسائل عند وجود chatId
+  // الاشتراك في الرسائل
   useEffect(() => {
     if (!chatId) return;
     const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp'));
@@ -78,19 +80,19 @@ export default function ChatPage() {
     return () => unsub();
   }, [chatId]);
 
-  // ✅ تصفير رسائل المدير غير المقروءة عند فتح الدردشة
+  // تصفير رسائل المستخدم غير المقروءة
   useEffect(() => {
     if (chatId && user) {
       updateDoc(doc(db, 'chats', chatId), { unreadUser: 0 }).catch(console.error);
     }
   }, [chatId, user]);
 
-  // تمرير تلقائي
+  // تمرير تلقائي للأسفل
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // ✅ إرسال الرسالة مع زيادة عداد غير مقروءة المدير
+  // إرسال رسالة
   const sendMessage = async () => {
     const text = newMsg.trim();
     if (!text) return;
@@ -125,7 +127,6 @@ export default function ChatPage() {
         text: text,
         timestamp: serverTimestamp()
       });
-      // ✅ تحديث آخر رسالة وزيادة عداد غير مقروءة المدير
       await updateDoc(doc(db, 'chats', activeChatId), {
         lastMessage: text,
         unreadAdmin: increment(1),
@@ -150,80 +151,86 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="dashboard-page">
+    <div className="chat-full-page">
       <Header />
       <div className="dashboard-bg" />
-      <div className="whatsapp-chat-container">
-        {/* شريط المحادثة العلوي */}
-        <div className="whatsapp-chat-header">
-          <div className="whatsapp-chat-avatar">
-            {adminInfo.photo ? (
-              <img src={adminInfo.photo} alt="المدير" />
-            ) : (
-              <div className="avatar-placeholder">🌸</div>
-            )}
-          </div>
-          <div className="whatsapp-chat-info">
-            <h3>{adminInfo.name}</h3>
-            <span>{adminInfo.lastSeen}</span>
-          </div>
-        </div>
 
-        {/* قائمة الرسائل */}
-        <div className="whatsapp-messages">
-          {messages.length === 0 && (
-            <p style={{ textAlign: 'center', color: '#aaa', marginTop: '40px' }}>
-              أرسل رسالة لبدء المحادثة
-            </p>
+      {/* شريط الدردشة العلوي الثابت */}
+      <div className="whatsapp-chat-header chat-header-fixed">
+        <button
+          className="chat-back-btn"
+          onClick={() => navigate(-1)}
+          aria-label="رجوع"
+        >
+          <FiArrowLeft size={22} />
+        </button>
+        <div className="whatsapp-chat-avatar">
+          {adminInfo.photo ? (
+            <img src={adminInfo.photo} alt="المدير" />
+          ) : (
+            <div className="avatar-placeholder">🌸</div>
           )}
-          {messages.map(m => (
-            <div
-              key={m.id}
-              className={`whatsapp-bubble ${m.senderId === user.uid ? 'sent' : 'received'}`}
-            >
-              <p>{m.text}</p>
-              <span className="whatsapp-time">{formatTime(m.timestamp)}</span>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
         </div>
-
-        {/* شريط الكتابة – بدون disabled */}
-        <div className="whatsapp-input-area">
-          <button
-            className="emoji-toggle-btn"
-            onClick={() => setShowEmoji(!showEmoji)}
-            type="button"
-          >
-            <FiSmile size={22} />
-          </button>
-          <input
-            ref={inputRef}
-            type="text"
-            className="whatsapp-input"
-            value={newMsg}
-            onChange={e => setNewMsg(e.target.value)}
-            placeholder="اكتب رسالة..."
-            onKeyDown={e => e.key === 'Enter' && sendMessage()}
-          />
-          {newMsg.trim() ? (
-            <button className="send-btn" onClick={sendMessage} type="button">
-              <FiSend size={20} />
-            </button>
-          ) : null}
+        <div className="whatsapp-chat-info">
+          <h3>{adminInfo.name}</h3>
+          <span>{adminInfo.lastSeen}</span>
         </div>
-
-        {/* لوحة الإيموجي */}
-        {showEmoji && (
-          <div className="emoji-picker-panel">
-            {EMOJI_LIST.map(emo => (
-              <button key={emo} className="emoji-item" onClick={() => insertEmoji(emo)} type="button">
-                {emo}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* منطقة الرسائل القابلة للتمرير */}
+      <div className="whatsapp-messages-area">
+        {messages.length === 0 && (
+          <p style={{ textAlign: 'center', color: '#aaa', marginTop: '40px' }}>
+            أرسل رسالة لبدء المحادثة
+          </p>
+        )}
+        {messages.map(m => (
+          <div
+            key={m.id}
+            className={`whatsapp-bubble ${m.senderId === user.uid ? 'sent' : 'received'}`}
+          >
+            <p>{m.text}</p>
+            <span className="whatsapp-time">{formatTime(m.timestamp)}</span>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* شريط الإدخال الثابت في الأسفل */}
+      <div className="whatsapp-input-area chat-input-fixed">
+        <button
+          className="emoji-toggle-btn"
+          onClick={() => setShowEmoji(!showEmoji)}
+          type="button"
+        >
+          <FiSmile size={22} />
+        </button>
+        <input
+          ref={inputRef}
+          type="text"
+          className="whatsapp-input"
+          value={newMsg}
+          onChange={e => setNewMsg(e.target.value)}
+          placeholder="اكتب رسالة..."
+          onKeyDown={e => e.key === 'Enter' && sendMessage()}
+        />
+        {newMsg.trim() ? (
+          <button className="send-btn" onClick={sendMessage} type="button">
+            <FiSend size={20} />
+          </button>
+        ) : null}
+      </div>
+
+      {/* لوحة الإيموجي فوق شريط الإدخال */}
+      {showEmoji && (
+        <div className="emoji-picker-panel emoji-panel-fixed">
+          {EMOJI_LIST.map(emo => (
+            <button key={emo} className="emoji-item" onClick={() => insertEmoji(emo)} type="button">
+              {emo}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

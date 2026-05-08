@@ -350,7 +350,7 @@ export default function DashboardPage() {
               <>
                 <div className="stats-section-header">
                   <h3 className="stats-section-title">
-                    <FiBarChart2 /> ملخص نشاطي
+                   نشاطي
                   </h3>
                   <div className="stats-section-filter">
                     {timeFilters.map(filter => (
