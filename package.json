@@ -5,14 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build","predeploy": "npm run build",
-  "deploy": "gh-pages -d dist",
+    "build": "vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.168.24",
     "@tanstack/react-table": "^8.21.3",
+    "@vitejs/plugin-legacy": "^8.0.1",
     "daisyui": "^5.5.19",
     "date-fns": "^4.1.0",
     "firebase": "^12.12.1",
