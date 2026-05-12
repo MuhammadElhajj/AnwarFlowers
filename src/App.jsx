@@ -1,67 +1,47 @@
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { useAdmin } from './contexts/AdminContext';
-import Footer from './components/Layout/Footer';
-import MobileBottomNav from './components/Layout/MobileBottomNav';
+import './styles/base/index';
 
+// مكون تحميل بسيط
+const PageLoader = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0f0f1a' }}>
+    <div style={{ color: '#fff', fontSize: '1.2rem' }}>جاري التحميل...</div>
+  </div>
+);
 
-// User Pages
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import ProductsPage from './pages/ProductsPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import MyOrdersPage from './pages/MyOrdersPage';
-import ProfilePage from './pages/ProfilePage';
-import ChatPage from './pages/ChatPage';
+// ========== التخطيطات (تحميل كسول أيضاً إن أردت) ==========
+const UserLayout = lazy(() => import('./components/Layout/UserLayout'));
+const AdminLayout = lazy(() => import('./components/Layout/AdminLayout'));
 
-// Admin Pages
-import AdminLoginPage from './pages/AdminLoginPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import AdminProductsPage from './pages/AdminProductsPage';
-import AdminOrdersPage from './pages/AdminOrdersPage';
-import AdminUsersPage from './pages/AdminUsersPage';
-import AdminSettingsPage from './pages/AdminSettingsPage';
-import AdminChatPage from './components/Admin/AdminChatPage';
-import AdminAddonsPage from './components/Admin/AdminAddonsPage';
-import AdminNotificationsPage from './components/Admin/AdminNotificationsPage';
+// ========== صفحات المستخدم ==========
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const MyOrdersPage = lazy(() => import('./pages/MyOrdersPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ChatPage = lazy(() => import('./pages/ChatPage'));
 
-// ========== Styles ==========
-import './styles/base/variables.css';
-import './styles/base/reset.css';
-import './styles/base/typography.css';
-import './styles/base/utilities.css';
-import './styles/components/buttons.css';
-import './styles/components/cards.css';
-import './styles/components/forms.css';
-import './styles/components/modal.css';
-import './styles/components/badges.css';
-import './styles/components/tables.css';
-import './styles/components/header.css';
-import './styles/components/sidebar.css';
-// import './styles/pages/auth.css';
-import './styles/pages/login.css';
-import './styles/pages/dashboard.css';
-import './styles/pages/products.css';
-import './styles/pages/cart.css';
-import './styles/pages/checkout.css';
-import './styles/pages/profile.css';
-import './styles/pages/orders.css';
-import './styles/admin/admin-base.css';
-import './styles/admin/admin-layout.css';
-import './styles/admin/admin-components.css';
-import './styles/admin/admin-dashboard.css';
-import './styles/admin/admin-orders.css';
-import './styles/admin/admin-chat.css';
-import './styles/components/bottom-nav.css';
+// ========== صفحات المدير ==========
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
+const AdminProductsPage = lazy(() => import('./pages/AdminProductsPage'));
+const AdminOrdersPage = lazy(() => import('./pages/AdminOrdersPage'));
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+const AdminChatPage = lazy(() => import('./components/Admin/AdminChatPage'));
+const AdminAddonsPage = lazy(() => import('./components/Admin/AdminAddonsPage'));
+const AdminNotificationsPage = lazy(() => import('./components/Admin/AdminNotificationsPage'));
 
+// ========== حماية المسارات ==========
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
   const savedUser = localStorage.getItem('anwar_flowers_user');
-  const isAuthenticated = user || savedUser;
-  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (!user && !savedUser) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -75,51 +55,43 @@ function AdminRoute({ children }) {
 }
 
 export default function App() {
-  const location = useLocation();
-  const { user } = useAuth();
-
-  const hideExtrasPaths = ['/', '/register', '/admin/login'];
-  const isAdminPath = location.pathname.startsWith('/admin');
-  
-  const showFooter = user && !hideExtrasPaths.includes(location.pathname) && !isAdminPath;
-  const showBottomNav = user && !hideExtrasPaths.includes(location.pathname) && !isAdminPath;
-
   return (
-    <>
+    <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Auth */}
+        {/* صفحات المصادقة (بدون تخطيط) */}
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* User (protected) */}
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
-        <Route path="/product/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
-        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-        <Route path="/my-orders" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+        {/* صفحات المستخدم داخل UserLayout */}
+        <Route element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/my-orders" element={<MyOrdersPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/chat" element={<ChatPage />} />
+        </Route>
 
-        {/* Admin */}
+        {/* دخول المدير (بدون تخطيط) */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
-        <Route path="/admin/products" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
-        <Route path="/admin/orders" element={<AdminRoute><AdminOrdersPage /></AdminRoute>} />
-        <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
-        <Route path="/admin/settings" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
-        <Route path="/admin/chat" element={<AdminRoute><AdminChatPage /></AdminRoute>} />
-        <Route path="/admin/addons" element={<AdminRoute><AdminAddonsPage /></AdminRoute>} />
-        <Route path="/admin/notifications" element={<AdminRoute><AdminNotificationsPage /></AdminRoute>} />
 
-        {/* Fallback */}
+        {/* صفحات المدير داخل AdminLayout مع حماية AdminRoute */}
+        <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin/products" element={<AdminProductsPage />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          <Route path="/admin/chat" element={<AdminChatPage />} />
+          <Route path="/admin/addons" element={<AdminAddonsPage />} />
+          <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+        </Route>
+
+        {/* التوجيه لأي مسار غير معروف */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
-      {/* أيقونة الشات العائمة فقط (تمت إزالة زر الدعم لأنه أصبح في الهيدر) */}
-     
-
-      {showBottomNav && <MobileBottomNav />}
-    </>
+    </Suspense>
   );
 }

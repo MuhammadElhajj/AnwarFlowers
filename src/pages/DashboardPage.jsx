@@ -6,8 +6,6 @@ import { useRewards } from '../contexts/RewardsContext';
 import { useCart } from '../contexts/CartContext';
 import { collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { db } from '../services/firebase';
-import Header from '../components/Layout/Header';
-import Sidebar from '../components/Layout/Sidebar';
 import StatsCard from '../components/Charts/StatsCard';
 import BarChart from '../components/Charts/BarChart';
 import StarRating from '../components/Charts/StarRating';
@@ -16,6 +14,7 @@ import {
   FiClock, FiCheckCircle, FiPackage, FiArrowRight,
   FiAward, FiGift, FiBarChart2
 } from 'react-icons/fi';
+
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -29,13 +28,12 @@ export default function DashboardPage() {
   const [showRewardsPanel, setShowRewardsPanel] = useState(false);
   const [timeFilter, setTimeFilter] = useState('all');
 
-  // ✅ جلب بيانات المستخدم الشخصية
+  // جلب بيانات المستخدم الشخصية (نفس الكود بدون تغيير)
   useEffect(() => {
     if (!user) return;
 
     const fetchMyDashboardData = async () => {
       try {
-        // 1. جلب طلباتي فقط (بدون orderBy لتجنب الحاجة لفهرس)
         const myOrdersQuery = query(
           collection(db, 'orders'),
           where('userId', '==', user.uid)
@@ -46,10 +44,9 @@ export default function DashboardPage() {
           .sort((a, b) => {
             const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
             const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-            return dateB - dateA; // الأحدث أولاً
+            return dateB - dateA;
           });
 
-        // 2. فلترة زمنية
         const now = new Date();
         let filteredOrders = myOrders;
         if (timeFilter === 'today') {
@@ -71,14 +68,11 @@ export default function DashboardPage() {
           });
         }
 
-        // 3. جلب التقييمات (عامة) – إذا فشل، نتعامل بصمت
         let ratings = [];
         try {
           const ratingsSnap = await getDocs(collection(db, 'ratings'));
           ratings = ratingsSnap.docs.map(doc => doc.data());
-        } catch (e) {
-          // لا نطبع تحذير، فقط ratings تبقى فارغة
-        }
+        } catch (e) { /* تجاهل */ }
 
         const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         ratings.forEach(r => { if (dist[r.rating] !== undefined) dist[r.rating]++; });
@@ -113,8 +107,8 @@ export default function DashboardPage() {
     fetchMyDashboardData();
   }, [user, timeFilter]);
 
-  // تقديم تقييم جديد
   const handleRate = async (star) => {
+    // نفس الكود بدون تغيير
     if (!user || !user.uid) return;
     try {
       const ratingsSnap = await getDocs(collection(db, 'ratings'));
@@ -157,7 +151,6 @@ export default function DashboardPage() {
 
   const currentLevel = levels[level];
 
-  // بطاقات الإحصائيات الشخصية
   const statCards = stats ? [
     {
       icon: <FiShoppingBag size={22} />,
@@ -243,23 +236,22 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-page">
-      <Header />
       <div className="dashboard-bg" />
 
       <div className="dashboard-layout">
         {/* Main Content */}
         <div className="dashboard-main-content">
-          <div className="dashboard-content" style={{ maxWidth: '100%', paddingRight: '20px' }}>
+          <div className="dashboard-content">
             {/* Welcome Card */}
             <div className="welcome-card">
               <div className="welcome-text">
                 <h1>{t('welcome')}، {user?.firstName || user?.displayName?.split(' ')[0]}! 🌸</h1>
                 <p>متجر متخصص في أفخم بوكيهات الورد والهدايا المميزة.</p>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
+                <div className="welcome-meta-row">
                   {stats && (
                     <div className="welcome-meta">📦 {stats.myOrders} طلبات | ⭐ {stats.avgRating} تقييم</div>
                   )}
-                  <div className="welcome-meta" style={{ cursor: 'pointer' }} onClick={() => setShowRewardsPanel(!showRewardsPanel)}>
+                  <div className="welcome-meta" onClick={() => setShowRewardsPanel(!showRewardsPanel)}>
                     {currentLevel.icon} {currentLevel.name} | ⭐ {points.toLocaleString()} نقطة
                   </div>
                 </div>
@@ -269,71 +261,38 @@ export default function DashboardPage() {
 
             {/* Rewards Quick Panel */}
             {showRewardsPanel && (
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '24px',
-                padding: '28px',
-                border: '1px solid rgba(255,255,255,0.08)',
-                marginBottom: '32px',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '20px'
-              }}>
-                {/* Level Info */}
+              <div className="rewards-quick-panel">
                 <div>
-                  <h4 style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h4 className="rewards-panel-title">
                     <FiAward color={currentLevel.color} /> مستواك: {currentLevel.name}
                   </h4>
-                  <div className="sidebar-progress-bar" style={{ marginBottom: '8px' }}>
+                  <div className="sidebar-progress-bar">
                     <div className="sidebar-progress-fill" style={{ width: `${progressPercent()}%` }} />
                   </div>
-                  <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+                  <p className="progress-text">
                     {ordersCount} طلبات | {pointsToNextLevel() > 0 ? `${pointsToNextLevel()} طلبات للمستوى التالي` : '🎉 أعلى مستوى!'}
                   </p>
                 </div>
 
-                {/* Coupons */}
                 <div>
-                  <h4 style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h4 className="rewards-panel-title">
                     <FiGift color="#f59e0b" /> كوبوناتك ({coupons.filter(c => !c.used).length})
                   </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '150px', overflowY: 'auto' }}>
+                  <div className="coupons-list">
                     {coupons.filter(c => !c.used).length === 0 ? (
-                      <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>🛍️ أكمل طلباتك للحصول على كوبونات</p>
+                      <p className="no-coupons-text">🛍️ أكمل طلباتك للحصول على كوبونات</p>
                     ) : (
                       coupons.filter(c => !c.used).slice(0, 3).map(coupon => (
                         <div
                           key={coupon.id}
                           onClick={() => handleApplyCouponFromDashboard(coupon)}
-                          style={{
-                            padding: '12px 14px',
-                            borderRadius: '10px',
-                            background: appliedCoupon?.id === coupon.id ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.04)',
-                            border: `1px solid ${appliedCoupon?.id === coupon.id ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.06)'}`,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            transition: 'all 0.3s'
-                          }}
-                          onMouseEnter={e => {
-                            if (appliedCoupon?.id !== coupon.id) {
-                              e.currentTarget.style.borderColor = 'rgba(245,158,11,0.3)';
-                              e.currentTarget.style.background = 'rgba(245,158,11,0.06)';
-                            }
-                          }}
-                          onMouseLeave={e => {
-                            if (appliedCoupon?.id !== coupon.id) {
-                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
-                              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                            }
-                          }}>
-                          <span style={{ fontSize: '1.4rem' }}>{coupon.icon}</span>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>{coupon.name}</div>
-                            <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.45)' }}>{coupon.description}</div>
-                            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: appliedCoupon?.id === coupon.id ? '#10b981' : '#f59e0b', marginTop: '2px' }}>
+                          className={`coupon-card ${appliedCoupon?.id === coupon.id ? 'coupon-applied' : ''}`}
+                        >
+                          <span className="coupon-icon">{coupon.icon}</span>
+                          <div className="coupon-info">
+                            <div className="coupon-name">{coupon.name}</div>
+                            <div className="coupon-desc">{coupon.description}</div>
+                            <div className={`coupon-status ${appliedCoupon?.id === coupon.id ? 'applied' : ''}`}>
                               {appliedCoupon?.id === coupon.id ? '✅ مطبق' : '🎫 اضغط للتطبيق'}
                             </div>
                           </div>
@@ -349,9 +308,7 @@ export default function DashboardPage() {
             {stats && (
               <>
                 <div className="stats-section-header">
-                  <h3 className="stats-section-title">
-                   نشاطي
-                  </h3>
+                  <h3 className="stats-section-title">نشاطي</h3>
                   <div className="stats-section-filter">
                     {timeFilters.map(filter => (
                       <button
@@ -478,7 +435,7 @@ export default function DashboardPage() {
                     آخر تحديث: {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   </span>
                   <span className="overview-footer-text">
-                    💰 إنفاقي: <strong style={{ color: '#10b981', margin: '0 4px' }}>${Number(stats.totalRevenue).toLocaleString()}</strong>
+                    💰 إنفاقي: <strong className="revenue-strong">${Number(stats.totalRevenue).toLocaleString()}</strong>
                   </span>
                 </div>
               </div>
@@ -510,8 +467,7 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-
-        <Sidebar />
+        {/* تم حذف Sidebar من هنا لأنه موجود في UserLayout */}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import Header from '../components/Layout/Header';
-import { FiSend, FiSmile, FiArrowLeft } from 'react-icons/fi';
+import { FiSend, FiSmile, FiArrowLeft, FiGift } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import '../styles/pages/chat.css';
 
@@ -24,7 +24,6 @@ export default function ChatPage() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // إنشاء الدردشة فوراً عند وجود المستخدم
   useEffect(() => {
     if (!user) return;
     const initChat = async () => {
@@ -51,7 +50,6 @@ export default function ChatPage() {
     initChat();
   }, [user]);
 
-  // معلومات المدير
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
@@ -69,7 +67,6 @@ export default function ChatPage() {
     fetchAdmin();
   }, []);
 
-  // الاشتراك في الرسائل
   useEffect(() => {
     if (!chatId) return;
     const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp'));
@@ -80,19 +77,16 @@ export default function ChatPage() {
     return () => unsub();
   }, [chatId]);
 
-  // تصفير رسائل المستخدم غير المقروءة
   useEffect(() => {
     if (chatId && user) {
       updateDoc(doc(db, 'chats', chatId), { unreadUser: 0 }).catch(console.error);
     }
   }, [chatId, user]);
 
-  // تمرير تلقائي للأسفل
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // إرسال رسالة
   const sendMessage = async () => {
     const text = newMsg.trim();
     if (!text) return;
@@ -168,7 +162,9 @@ export default function ChatPage() {
           {adminInfo.photo ? (
             <img src={adminInfo.photo} alt="المدير" />
           ) : (
-            <div className="avatar-placeholder">🌸</div>
+            <div className="avatar-placeholder">
+              <FiGift size={24} />
+            </div>
           )}
         </div>
         <div className="whatsapp-chat-info">
@@ -177,10 +173,10 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* منطقة الرسائل القابلة للتمرير */}
+      {/* منطقة الرسائل */}
       <div className="whatsapp-messages-area">
         {messages.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#aaa', marginTop: '40px' }}>
+          <p className="empty-chat-message">
             أرسل رسالة لبدء المحادثة
           </p>
         )}
@@ -196,7 +192,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* شريط الإدخال الثابت في الأسفل */}
+      {/* شريط الإدخال */}
       <div className="whatsapp-input-area chat-input-fixed">
         <button
           className="emoji-toggle-btn"
@@ -221,7 +217,6 @@ export default function ChatPage() {
         ) : null}
       </div>
 
-      {/* لوحة الإيموجي فوق شريط الإدخال */}
       {showEmoji && (
         <div className="emoji-picker-panel emoji-panel-fixed">
           {EMOJI_LIST.map(emo => (

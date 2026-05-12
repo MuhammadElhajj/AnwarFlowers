@@ -5,7 +5,10 @@ import { useRewards } from '../../contexts/RewardsContext';
 import { useCart } from '../../contexts/CartContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../services/firebase';
-import { FiLogOut, FiGift, FiTrendingUp, FiChevronLeft, FiChevronRight, FiRefreshCw, FiCheck, FiX } from 'react-icons/fi';
+import { 
+  FiLogOut, FiGift, FiTrendingUp, FiChevronLeft, FiChevronRight, 
+  FiRefreshCw, FiCheck, FiX, FiAward, FiShoppingBag 
+} from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 export default function Sidebar() {
@@ -15,7 +18,6 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
-  // كوبونات المستخدم (تُجلب من Firestore)
   const [userCoupons, setUserCoupons] = useState([]);
   const [loadingCoupons, setLoadingCoupons] = useState(true);
 
@@ -23,7 +25,6 @@ export default function Sidebar() {
     if (!user?.uid) return;
     setLoadingCoupons(true);
     try {
-      // جلب الكوبونات غير المستخدمة فقط
       const q = query(
         collection(db, 'userCoupons'),
         where('userId', '==', user.uid),
@@ -36,12 +37,9 @@ export default function Sidebar() {
         createdAt: doc.data().createdAt || new Date().toISOString(),
         expiresAt: doc.data().expiresAt || null
       }));
-      // ترتيب تنازلي يدوي حسب التاريخ
       list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setUserCoupons(list);
     } catch (err) {
-      console.error('فشل جلب كوبونات المستخدم:', err);
-      // محاولة بديلة بدون شرط used (ثم نفلتر يدوياً)
       try {
         const fallbackQ = query(collection(db, 'userCoupons'), where('userId', '==', user.uid));
         const snap = await getDocs(fallbackQ);
@@ -50,9 +48,7 @@ export default function Sidebar() {
           .filter(c => c.used === false)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setUserCoupons(list);
-      } catch (err2) {
-        console.error(err2);
-      }
+      } catch (err2) { /* ignore */ }
     } finally {
       setLoadingCoupons(false);
     }
@@ -70,15 +66,12 @@ export default function Sidebar() {
     navigate('/');
   };
 
-  // ✅ تطبيق/إلغاء الكوبون بناءً على نقرة واحدة
   const handleCouponClick = (coupon) => {
-    // إذا كان الكوبون هو نفسه المُطبق، قم بإلغائه
     if (appliedCoupon?.id === coupon.id || appliedCoupon?.code === coupon.code) {
       removeCouponFromCart();
       toast.success('تم إلغاء الكوبون');
       return;
     }
-    // وإلا قم بتطبيق الكوبون (سيزيل الكوبون السابق تلقائياً)
     applyCouponToCart(coupon.code);
   };
 
@@ -99,7 +92,6 @@ export default function Sidebar() {
     } catch { return ''; }
   };
 
-  // هل كوبون معين هو المطبق حالياً؟
   const isCouponApplied = (coupon) => {
     return appliedCoupon?.code === coupon.code;
   };
@@ -121,7 +113,7 @@ export default function Sidebar() {
                 {user?.profileImage ? (
                   <img src={user.profileImage} alt="" />
                 ) : (
-                  user?.firstName?.[0]?.toUpperCase() || '👤'
+                  user?.firstName?.[0]?.toUpperCase() || <FiAward size={36} />
                 )}
               </div>
               <div className="sidebar-avatar-online" />
@@ -157,7 +149,7 @@ export default function Sidebar() {
 
           {/* النقاط */}
           <div className="sidebar-points-display">
-            <span className="sidebar-points-icon">⭐</span>
+            <span className="sidebar-points-icon"><FiAward size={24} /></span>
             <div>
               <div className="sidebar-points-value">{points.toLocaleString()}</div>
               <div className="sidebar-points-label">نقطة مكافآت</div>
@@ -166,64 +158,40 @@ export default function Sidebar() {
 
           {/* الكوبونات المتاحة */}
           <div className="sidebar-coupons-section">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="sidebar-coupons-header-row">
               <div className="sidebar-coupons-title">
                 <FiGift size={16} /> الكوبونات المتاحة
               </div>
-              <button 
-                onClick={fetchUserCoupons} 
-                style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                title="تحديث الكوبونات"
-              >
+              <button className="sidebar-coupons-refresh-btn" onClick={fetchUserCoupons} title="تحديث الكوبونات">
                 <FiRefreshCw size={14} />
               </button>
             </div>
 
-            {/* عرض الكوبون المُطبق حالياً (إن وُجد) */}
             {appliedCoupon && (
-              <div style={{ 
-                background: 'rgba(16, 185, 129, 0.15)', 
-                border: '1px solid rgba(16, 185, 129, 0.4)', 
-                borderRadius: '12px', 
-                padding: '10px', 
-                marginTop: '10px', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
-              }}>
+              <div className="applied-coupon-banner">
                 <div>
-                  <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>
-                    🎫 {appliedCoupon.name || 'كوبون'} نشط
+                  <div className="applied-coupon-name">
+                    <FiGift size={16} /> {appliedCoupon.name || 'كوبون'} نشط
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  <div className="applied-coupon-details">
                     خصم {appliedCoupon.discount}% | توفير {getDiscountAmount(appliedCoupon)}
                   </div>
                 </div>
-                <button 
-                  onClick={() => { removeCouponFromCart(); toast.success('تم إلغاء الكوبون'); }}
-                  style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '0.9rem' }}
-                >
+                <button className="remove-coupon-btn" onClick={() => { removeCouponFromCart(); toast.success('تم إلغاء الكوبون'); }}>
                   <FiX size={18} />
                 </button>
               </div>
             )}
 
             {loadingCoupons ? (
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textAlign: 'center', padding: '2rem' }}>
-                جاري تحميل الكوبونات...
-              </p>
+              <p className="sidebar-loading-text">جاري تحميل الكوبونات...</p>
             ) : userCoupons.length === 0 ? (
-              <p style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.35)',
-                textAlign: 'center',
-                padding: '24px 0',
-                lineHeight: '1.6'
-              }}>
-                🛍️ أكمل طلباتك<br/>للحصول على كوبونات خصم
+              <p className="sidebar-empty-coupons">
+                <FiShoppingBag size={20} /><br />
+                أكمل طلباتك للحصول على كوبونات خصم
               </p>
             ) : (
-              <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="sidebar-coupons-list">
                 {userCoupons.map(coupon => {
                   const applied = isCouponApplied(coupon);
                   return (
@@ -231,48 +199,25 @@ export default function Sidebar() {
                       key={coupon.id}
                       className={`coupon-card ${applied ? 'applied' : ''}`}
                       onClick={() => handleCouponClick(coupon)}
-                      style={{
-                        cursor: 'pointer',
-                        border: applied ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
-                        position: 'relative'
-                      }}
                     >
                       {applied && (
-                        <span style={{
-                          position: 'absolute', top: '6px', right: '6px',
-                          background: '#10b981', color: '#fff', borderRadius: '50%',
-                          width: '20px', height: '20px', display: 'flex',
-                          alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem'
-                        }}>
+                        <span className="applied-check-badge">
                           <FiCheck size={14} />
                         </span>
                       )}
                       <div className="coupon-header">
-                        <span className="coupon-icon">🎫</span>
+                        <span className="coupon-icon"><FiGift size={18} /></span>
                         <span className="coupon-name">{coupon.name || 'كوبون خصم'}</span>
                       </div>
                       <div className="coupon-desc">
                         خصم {coupon.discount}% {coupon.type === 'delivery' ? 'على التوصيل' : 'على المنتجات'}
                       </div>
                       <div className="coupon-discount">
-                        📅 صالح حتى {formatExpiry(coupon.expiresAt)} | 💰 توفير {getDiscountAmount(coupon)}
+                        صالح حتى {formatExpiry(coupon.expiresAt)} | توفير {getDiscountAmount(coupon)}
                       </div>
-                      <div className="coupon-code" style={{
-                        fontFamily: 'monospace', fontSize: '0.8rem', marginTop: '4px',
-                        background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px'
-                      }}>
-                        {coupon.code}
-                      </div>
-                      {!applied && (
-                        <div style={{ marginTop: '6px', fontSize: '0.7rem', color: 'var(--accent)' }}>
-                          اضغط للتطبيق
-                        </div>
-                      )}
-                      {applied && (
-                        <div style={{ marginTop: '6px', fontSize: '0.7rem', color: '#10b981' }}>
-                          ✅ مُطبق حالياً – اضغط للإلغاء
-                        </div>
-                      )}
+                      <div className="coupon-code">{coupon.code}</div>
+                      {!applied && <div className="coupon-action-hint">اضغط للتطبيق</div>}
+                      {applied && <div className="coupon-action-hint applied">✅ مُطبق – اضغط للإلغاء</div>}
                     </div>
                   );
                 })}
@@ -280,7 +225,6 @@ export default function Sidebar() {
             )}
           </div>
 
-          {/* تسجيل الخروج */}
           <div className="sidebar-footer">
             <button className="sidebar-logout-btn" onClick={handleLogout}>
               <FiLogOut size={16} /> تسجيل الخروج

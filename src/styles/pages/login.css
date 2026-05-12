@@ -157,7 +157,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin: 1.5rem 0;
+  margin: 0.5rem 0;
   color: rgba(255, 255, 255, 0.4);
 }
 
@@ -236,14 +236,15 @@
   .auth-card {
     max-width: 100%;
     border-radius: 0;
-    padding: 3rem 1.5rem 2rem;
+    padding: 2rem 1.5rem ;
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(25px);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 100vh;
+    max-height: 100vh;
   }
+ 
 }
 
 /* صورة اللوغو */
@@ -395,3 +396,4 @@
     padding: 0.6rem 0.8rem;
   }
 }
+

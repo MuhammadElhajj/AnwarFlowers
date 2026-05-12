@@ -6,7 +6,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import {
   FiShoppingCart, FiUser, FiLogOut, FiPackage,
-  FiGrid, FiList, FiBell, FiCheck, FiHeadphones
+  FiGrid, FiList, FiBell, FiCheck, FiHeadphones, FiGlobe
 } from 'react-icons/fi';
 import heroLogo from '../../assets/hero.jpg';
 
@@ -71,14 +71,14 @@ export default function Header() {
         <div className="header-actions">
           <div className="language-switcher" ref={langMenuRef}>
             <button className="header-icon-btn lang-btn" onClick={() => setShowLangMenu(!showLangMenu)}>
-              <span className="current-lang-flag">{supportedLangs.find(l => l.code === lang)?.flag || '🌐'}</span>
+              <FiGlobe size={18} />
             </button>
             {showLangMenu && (
               <div className="lang-dropdown">
                 {supportedLangs.map(l => (
                   <button key={l.code} className={`lang-item ${lang === l.code ? 'active' : ''}`}
                     onClick={() => { setLang(l.code); setShowLangMenu(false); }}>
-                    <span>{l.flag}</span> {l.label}
+                    {l.label}
                   </button>
                 ))}
               </div>

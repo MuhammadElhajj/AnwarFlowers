@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FiLock, FiMail, FiShield } from 'react-icons/fi';
+import '../styles/pages/login.css';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -33,7 +35,9 @@ export default function AdminLoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">🛡️</div>
+          <div className="auth-logo">
+            <FiShield size={32} />
+          </div>
           <h1 className="auth-title">لوحة التحكم</h1>
           <p className="auth-subtitle">تسجيل دخول المدير</p>
         </div>
@@ -42,7 +46,10 @@ export default function AdminLoginPage() {
         
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="auth-input-group">
-            <label htmlFor="admin-email" className="auth-label">البريد الإلكتروني</label>
+            <label htmlFor="admin-email" className="auth-label">
+              <FiMail size={14} style={{ marginRight: '6px' }} />
+              البريد الإلكتروني
+            </label>
             <input 
               id="admin-email"
               name="email"
@@ -55,7 +62,10 @@ export default function AdminLoginPage() {
             />
           </div>
           <div className="auth-input-group">
-            <label htmlFor="admin-password" className="auth-label">كلمة المرور</label>
+            <label htmlFor="admin-password" className="auth-label">
+              <FiLock size={14} style={{ marginRight: '6px' }} />
+              كلمة المرور
+            </label>
             <input 
               id="admin-password"
               name="password"

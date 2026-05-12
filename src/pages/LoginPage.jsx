@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-
+import { FiMail, FiLock, FiLogIn } from 'react-icons/fi';
 // import heroLogo from '../assets/hero.jpg';
 
 export default function LoginPage() {
@@ -50,20 +50,22 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-       <div className="auth-header">
-  <div className="auth-logo-container">
-    {/* <img src={heroLogo} alt="Logo" className="auth-logo-img" /> */}
-  </div>
-  {/* <h1 className="auth-title">{t('appName')}</h1> */}
-  <h1 className="auth-title">Anwar Flowers Shop</h1>
-  <p className="auth-subtitle">تسجيل الدخول للمتابعة</p>
-</div>
+        <div className="auth-header">
+          <div className="auth-logo-container">
+            {/* <img src={heroLogo} alt="Logo" className="auth-logo-img" /> */}
+          </div>
+          <h1 className="auth-title">{t('appName')}</h1>
+          <p className="auth-subtitle">تسجيل الدخول للمتابعة</p>
+        </div>
 
         {error && <div className="auth-error">{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="auth-input-group">
-            <label className="auth-label">{t('email')}</label>
+            <label className="auth-label">
+              <FiMail size={14} style={{ marginRight: '6px' }} />
+              {t('email')}
+            </label>
             <input
               type="email"
               className="auth-input"
@@ -75,7 +77,10 @@ export default function LoginPage() {
             />
           </div>
           <div className="auth-input-group">
-            <label className="auth-label">{t('password')}</label>
+            <label className="auth-label">
+              <FiLock size={14} style={{ marginRight: '6px' }} />
+              {t('password')}
+            </label>
             <input
               type="password"
               className="auth-input"
@@ -87,7 +92,14 @@ export default function LoginPage() {
             />
           </div>
           <button type="submit" className="auth-submit-btn" disabled={loading}>
-            {loading ? '⏳ جاري الدخول...' : '🌸 تسجيل الدخول'}
+            {loading ? (
+              'جاري الدخول...'
+            ) : (
+              <>
+                <FiLogIn size={18} style={{ marginRight: '8px' }} />
+                تسجيل الدخول
+              </>
+            )}
           </button>
         </form>
 

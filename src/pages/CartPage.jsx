@@ -8,7 +8,8 @@ import {
 } from '../contexts/CartContext';
 import Header from '../components/Layout/Header';
 import Sidebar from '../components/Layout/Sidebar';
-import { FiTrash2, FiMinus, FiPlus } from 'react-icons/fi';
+import { FiTrash2, FiMinus, FiPlus, FiShoppingCart, FiGift, FiMessageSquare, FiDroplet } from 'react-icons/fi';
+import '../styles/pages/user-pages-shared.css'; // استيراد التنسيقات الموحدة
 
 export default function CartPage() {
   const { t } = useLanguage();
@@ -22,7 +23,6 @@ export default function CartPage() {
     addonsList
   } = useCart();
   const navigate = useNavigate();
- 
 
   const costs = calculateCost();
 
@@ -45,11 +45,12 @@ export default function CartPage() {
         <div className="dashboard-layout">
           <div className="dashboard-main-content">
             <div className="dashboard-content">
-              <div className="empty-cart">
-                <div className="empty-cart-icon">🛒</div>
+              <div className="empty-cart empty-state">
+                <div className="empty-state-icon">
+                  <FiShoppingCart size={80} />
+                </div>
                 <h2>السلة فارغة</h2>
-                <button className="checkout-btn" style={{ maxWidth: '300px', margin: '20px auto' }}
-                  onClick={() => navigate('/products')}>
+                <button className="btn btn-primary" onClick={() => navigate('/products')}>
                   تصفح المنتجات
                 </button>
               </div>
@@ -69,7 +70,9 @@ export default function CartPage() {
       <div className="dashboard-layout">
         <div className="dashboard-main-content">
           <div className="dashboard-content">
-            <h1 className="cart-title">🛒 {t('cart')}</h1>
+            <h1 className="cart-title page-title">
+              <FiShoppingCart size={28} /> {t('cart')}
+            </h1>
 
             <div className="cart-grid">
               <div className="cart-items">
@@ -95,7 +98,7 @@ export default function CartPage() {
                         width: '100%',
                         height: '100%'
                       }}>
-                        🌸
+                        <FiGift size={32} /> {/* استبدلنا الإيموجي بأيقونة هدية */}
                       </span>
                     </div>
                     <div className="cart-item-info">
@@ -115,7 +118,9 @@ export default function CartPage() {
 
                 {items.length > 0 && (
                   <div className="customization-section">
-                    <h3 className="customization-title">✨ إضافات وتخصيص</h3>
+                    <h3 className="customization-title">
+                      <FiGift size={20} /> إضافات وتخصيص
+                    </h3>
                     
                     <div className="addons-grid">
                       {addons.length === 0 ? (
@@ -140,7 +145,10 @@ export default function CartPage() {
                     </div>
 
                     <div className="custom-message-section">
-                      <label className="custom-label">💌 رسالة على الباقة (اختياري)</label>
+                      <label className="custom-label">
+                        <FiMessageSquare size={16} style={{ marginRight: '6px' }} />
+                        رسالة على الباقة (اختياري)
+                      </label>
                       <textarea
                         className="custom-textarea"
                         value={customMessage}
@@ -183,7 +191,10 @@ export default function CartPage() {
                     </div>
 
                     <div className="wrapping-color-section">
-                      <label className="custom-label">🎁 لون ورق التغليف</label>
+                      <label className="custom-label">
+                        <FiDroplet size={16} style={{ marginRight: '6px' }} />
+                        لون ورق التغليف
+                      </label>
                       <div className="color-picker-row">
                         <input
                           type="color"
@@ -198,23 +209,23 @@ export default function CartPage() {
                 )}
               </div>
 
-              <div className="cart-summary">
+              <div className="cart-summary cost-summary">
                 <h2 className="summary-title">🧾 ملخص الطلب</h2>
-                <div className="summary-row"><span>المنتجات ({costs.itemCount})</span><span>${costs.subtotal}</span></div>
+                <div className="summary-row cost-row"><span>المنتجات ({costs.itemCount})</span><span>${costs.subtotal}</span></div>
                 {costs.addonsCost > 0 && (
-                  <div className="summary-row"><span>✨ الإضافات</span><span>${costs.addonsCost}</span></div>
+                  <div className="summary-row cost-row"><span>✨ الإضافات</span><span>${costs.addonsCost}</span></div>
                 )}
-                <div className="summary-row"><span>التوصيل</span><span>${costs.deliveryCost}</span></div>
-                <div className="summary-row"><span>التغليف</span><span>${costs.wrappingCost}</span></div>
-                <div className="summary-row"><span>الضريبة</span><span>${costs.tax}</span></div>
+                <div className="summary-row cost-row"><span>التوصيل</span><span>${costs.deliveryCost}</span></div>
+                <div className="summary-row cost-row"><span>التغليف</span><span>${costs.wrappingCost}</span></div>
+                <div className="summary-row cost-row"><span>الضريبة</span><span>${costs.tax}</span></div>
                 {costs.discountAmount > 0 && (
-                  <div className="summary-row" style={{ color: 'var(--success)' }}>
+                  <div className="summary-row cost-row" style={{ color: 'var(--success)' }}>
                     <span>🎫 {costs.discountLabel}</span>
                     <span>-${costs.discountAmount}</span>
                   </div>
                 )}
-                <div className="summary-total"><span>المجموع</span><span>${costs.total}</span></div>
-                <button className="checkout-btn" onClick={() => navigate('/checkout')}>
+                <div className="summary-total cost-row total"><span>المجموع</span><span>${costs.total}</span></div>
+                <button className="checkout-btn btn btn-primary" onClick={() => navigate('/checkout')}>
                   💳 متابعة الدفع
                 </button>
               </div>
