@@ -1,8 +1,8 @@
 /* ========================================
-   Sidebar - Fixed Premium Glass Design
-   RTL/LTR Support - Fire Design
+   Sidebar - ثابت مع دعم RTL/LTR وردود فعل
    ======================================== */
 
+/* ========== الحاوية الرئيسية ========== */
 .dashboard-layout {
   display: flex;
   min-height: calc(100vh - 70px);
@@ -15,7 +15,7 @@
   transition: margin 0.3s ease;
 }
 
-/* Sidebar Container - Fixed */
+/* ========== الشريط الجانبي الثابت ========== */
 .dashboard-sidebar {
   width: 310px;
   flex-shrink: 0;
@@ -31,110 +31,63 @@
     rgba(15, 10, 40, 0.98) 100%);
   backdrop-filter: blur(30px) saturate(180%);
   border-left: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 
-    -8px 0 40px rgba(0, 0, 0, 0.4),
-    inset -1px 0 0 rgba(255, 255, 255, 0.03);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* RTL (Arabic) - Sidebar on Right */
+/* RTL (العربية) - السايدبار على اليمين */
 [dir="rtl"] .dashboard-sidebar {
   right: 0;
   border-left: 1px solid rgba(255, 255, 255, 0.06);
   border-right: none;
-  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4), inset -1px 0 0 rgba(255, 255, 255, 0.03);
 }
-
 [dir="rtl"] .dashboard-main-content {
   margin-right: 310px;
 }
 
-/* LTR (English) - Sidebar on Left */
+/* LTR (الإنجليزية) - السايدبار على اليسار */
 [dir="ltr"] .dashboard-sidebar {
   left: 0;
-  right: auto;
   border-left: none;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.4), inset 1px 0 0 rgba(255, 255, 255, 0.03);
+  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.4);
 }
-
 [dir="ltr"] .dashboard-main-content {
   margin-left: 310px;
 }
 
-/* Sidebar Inner Scroll */
-.sidebar-inner {
-  padding: 24px 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  flex: 1;
-}
-
-/* Custom Scrollbar */
+/* ========== شريط التمرير ========== */
 .dashboard-sidebar::-webkit-scrollbar {
   width: 4px;
 }
-
 .dashboard-sidebar::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .dashboard-sidebar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
 }
 
-.dashboard-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+/* ========== المحتوى الداخلي ========== */
+.sidebar-inner {
+  padding: 24px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* Glow Effect on Top */
-.dashboard-sidebar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 120px;
-  background: linear-gradient(to bottom, 
-    rgba(102, 126, 234, 0.12) 0%,
-    rgba(168, 85, 247, 0.06) 50%,
-    transparent 100%);
-  pointer-events: none;
-}
-
-/* Dots Pattern */
-.dashboard-sidebar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: 
-    radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.08), transparent),
-    radial-gradient(1px 1px at 75% 55%, rgba(255,255,255,0.06), transparent),
-    radial-gradient(1px 1px at 40% 85%, rgba(255,255,255,0.04), transparent);
-  background-size: 100px 100px;
-  pointer-events: none;
-}
-
-/* ========== Profile Section ========== */
+/* ========== الصورة الشخصية ========== */
 .sidebar-profile {
   text-align: center;
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  position: relative;
-  z-index: 1;
 }
-
 .sidebar-avatar-wrapper {
   position: relative;
   display: inline-block;
   margin-bottom: 12px;
 }
-
 .sidebar-avatar {
   width: 85px;
   height: 85px;
@@ -143,31 +96,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 800;
   color: #fff;
   border: 3px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 10px 35px rgba(102, 126, 234, 0.4),
-    0 0 0 4px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 10px 35px rgba(102, 126, 234, 0.4);
   overflow: hidden;
-  transition: all 0.3s ease;
 }
-
-.sidebar-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 
-    0 15px 45px rgba(102, 126, 234, 0.5),
-    0 0 0 8px rgba(102, 126, 234, 0.15);
-}
-
 .sidebar-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
-/* Online Indicator */
 .sidebar-avatar-online {
   position: absolute;
   bottom: 4px;
@@ -177,28 +117,20 @@
   background: #10b981;
   border-radius: 50%;
   border: 3px solid rgba(20, 15, 50, 0.95);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
-
 [dir="ltr"] .sidebar-avatar-online {
   right: auto;
   left: 4px;
 }
-
 .sidebar-username {
   font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 2px;
 }
-
 .sidebar-email {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.4);
-  margin-bottom: 10px;
 }
-
-/* Level Badge */
 .sidebar-level-badge {
   display: inline-flex;
   align-items: center;
@@ -208,63 +140,40 @@
   font-size: 0.78rem;
   font-weight: 700;
   border: 1px solid;
-  transition: all 0.3s ease;
+  margin-top: 8px;
 }
 
-/* ========== Progress Section ========== */
+/* ========== التقدم ========== */
 .sidebar-progress-section {
   padding-bottom: 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  position: relative;
-  z-index: 1;
 }
-
 .sidebar-progress-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 10px;
 }
-
 .sidebar-progress-label {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.5);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
-
 .sidebar-progress-value {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.45);
-  font-weight: 600;
 }
-
 .sidebar-progress-bar {
   width: 100%;
   height: 8px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
-
 .sidebar-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #a855f7, #667eea);
-  background-size: 200% 100%;
+  background: linear-gradient(90deg, #667eea, #a855f7);
   border-radius: 6px;
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
-  animation: progressShine 3s linear infinite;
+  transition: width 1s ease;
 }
-
-@keyframes progressShine {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
 .sidebar-next-level {
   font-size: 0.68rem;
   color: rgba(255, 255, 255, 0.35);
@@ -272,7 +181,7 @@
   text-align: center;
 }
 
-/* ========== Points Display ========== */
+/* ========== النقاط ========== */
 .sidebar-points-display {
   display: flex;
   align-items: center;
@@ -282,49 +191,27 @@
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(251, 191, 36, 0.08));
   border-radius: 14px;
   border: 1px solid rgba(245, 158, 11, 0.15);
-  position: relative;
-  z-index: 1;
-  transition: all 0.3s ease;
 }
-
-.sidebar-points-display:hover {
-  border-color: rgba(245, 158, 11, 0.3);
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
-}
-
 .sidebar-points-icon {
   font-size: 1.6rem;
-  animation: float 3s ease-in-out infinite;
 }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
 .sidebar-points-value {
   font-size: 1.4rem;
   font-weight: 800;
   background: linear-gradient(180deg, #fbbf24, #f59e0b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
-
 .sidebar-points-label {
   font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
-/* ========== Coupons Section ========== */
+/* ========== الكوبونات ========== */
 .sidebar-coupons-section {
   flex: 1;
-  position: relative;
-  z-index: 1;
 }
-
 .sidebar-coupons-title {
   font-size: 0.85rem;
   font-weight: 700;
@@ -334,133 +221,44 @@
   align-items: center;
   gap: 8px;
 }
-
-.sidebar-coupons-title svg {
-  color: #f59e0b;
-}
-
 .coupon-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 14px;
-  padding: 14px 14px 14px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px;
   margin-bottom: 8px;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s;
 }
-
-/* Punched holes effect */
-.coupon-card::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -10px;
-  width: 20px;
-  height: 20px;
-  background: rgba(20, 15, 50, 0.95);
-  border-radius: 50%;
-  transform: translateY(-50%);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-.coupon-card::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -10px;
-  width: 20px;
-  height: 20px;
-  background: rgba(20, 15, 50, 0.95);
-  border-radius: 50%;
-  transform: translateY(-50%);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
 .coupon-card:hover {
   border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   transform: translateX(-3px);
 }
-
 [dir="ltr"] .coupon-card:hover {
   transform: translateX(3px);
 }
-
-.coupon-card.used {
-  opacity: 0.45;
-  cursor: not-allowed;
-  filter: grayscale(30%);
-}
-
-.coupon-card.applied {
-  border-color: rgba(16, 185, 129, 0.4) !important;
-  background: rgba(16, 185, 129, 0.08) !important;
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.15) !important;
-}
-
-.coupon-card.applied::before,
-.coupon-card.applied::after {
-  background: rgba(16, 185, 129, 0.15);
-}
-
 .coupon-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 4px;
 }
-
-.coupon-icon {
-  font-size: 1.4rem;
-}
-
 .coupon-name {
   font-size: 0.82rem;
   font-weight: 700;
   color: #fff;
-  flex: 1;
 }
-
 .coupon-desc {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.4);
 }
-
 .coupon-discount {
   font-size: 0.75rem;
   font-weight: 700;
   color: #10b981;
-  margin-top: 4px;
 }
 
-.coupon-used-badge {
-  position: absolute;
-  top: 6px;
-  right: 22px;
-  font-size: 0.6rem;
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-  padding: 2px 7px;
-  border-radius: 8px;
-  font-weight: 700;
-  z-index: 1;
-}
-
-[dir="ltr"] .coupon-used-badge {
-  right: auto;
-  left: 22px;
-}
-
-/* ========== Sidebar Footer ========== */
-.sidebar-footer {
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  position: relative;
-  z-index: 1;
-}
-
+/* ========== زر الخروج ========== */
 .sidebar-logout-btn {
   width: 100%;
   padding: 12px;
@@ -470,22 +268,18 @@
   border: 1px solid rgba(239, 68, 68, 0.15);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 0.85rem;
 }
-
 .sidebar-logout-btn:hover {
   background: rgba(239, 68, 68, 0.2);
   color: #fff;
-  border-color: rgba(239, 68, 68, 0.3);
-  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
 }
 
-/* ========== Sidebar Toggle Button ========== */
+/* ========== زر التبديل (للشاشات الصغيرة) ========== */
 .sidebar-toggle {
   display: none;
   position: fixed;
@@ -500,78 +294,56 @@
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  transition: all 0.3s ease;
   backdrop-filter: blur(10px);
 }
-
 [dir="rtl"] .sidebar-toggle {
   right: 10px;
 }
-
 [dir="ltr"] .sidebar-toggle {
   left: 10px;
 }
-
-.sidebar-toggle:hover {
-  background: rgba(102, 126, 234, 0.4);
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 39;
 }
 
-/* ========== Responsive ========== */
+/* ========== استجابة (شاشات أصغر من 1024px) ========== */
 @media (max-width: 1024px) {
   .dashboard-sidebar {
     transform: translateX(100%);
-    width: 300px;
   }
-
   [dir="ltr"] .dashboard-sidebar {
     transform: translateX(-100%);
   }
-
   .dashboard-sidebar.open {
     transform: translateX(0);
   }
-
-  [dir="rtl"] .dashboard-main-content {
-    margin-right: 0;
-  }
-
+  [dir="rtl"] .dashboard-main-content,
   [dir="ltr"] .dashboard-main-content {
-    margin-left: 0;
+    margin: 0 !important;
   }
-
   .sidebar-toggle {
     display: flex;
   }
-
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 39;
-  }
-
   .sidebar-overlay.show {
     display: block;
   }
 }
 
+/* ========== تحسين للشاشات الصغيرة جداً ========== */
 @media (max-width: 480px) {
   .dashboard-sidebar {
-    width: 100%;
-    max-width: 300px;
+    width: 280px;
   }
-
   .sidebar-inner {
     padding: 20px 14px 16px;
-    gap: 16px;
   }
-
   .sidebar-avatar {
     width: 70px;
     height: 70px;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 }

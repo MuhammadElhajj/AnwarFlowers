@@ -6,9 +6,9 @@ export default function AdminLayout() {
   return (
     <div className="admin-layout">
       <AdminHeader />
-      <div className="admin-layout__body" style={{ display: 'flex' }}>
+      <div className="admin-layout__body">
         <AdminSidebar />
-        <main style={{ flex: 1 }}>
+        <main className="admin-layout__main">
           <Outlet />
         </main>
       </div>

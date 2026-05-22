@@ -1,12 +1,10 @@
 /* ========================================
    Design System Variables
    ======================================== */
-html {
-  scroll-behavior: smooth;
-}* {
-  -webkit-overflow-scrolling: touch; /* لتحسين التمرير على الأجهزة التي تعمل باللمس */
-}
+
 :root {
+  color-scheme: dark;
+
   /* Backgrounds */
   --bg-primary: #0f0c29;
   --bg-secondary: #302b63;
@@ -96,10 +94,15 @@ html {
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
+
+  /* Smooth scrolling for all containers */
+  scroll-behavior: smooth;
 }
 
 /* Light Mode */
 body.light-mode {
+  color-scheme: light;
+
   --bg-primary: #f8fafc;
   --bg-secondary: #e2e8f0;
   --bg-tertiary: #cbd5e1;
@@ -128,13 +131,7 @@ body.light-mode {
   --glass-border: rgba(0,0,0,0.1);
 }
 
-/* ========== Smooth Scrolling ========== */
-html {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* أي حاوية ذات تمرير داخلي تصبح سلسة */
+/* كل الحاويات القابلة للتمرير */
 [class*="overflow"],
 [class*="scroll"],
 .chat-messages-modern,

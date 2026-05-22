@@ -56,36 +56,58 @@ export default function Header() {
     <header className={`main-header ${scrolled ? 'scrolled' : ''}`}>
       <div className="header-inner">
         <div className="header-logo" onClick={() => navigate('/dashboard')}>
-          <img src={heroLogo} alt="Logo" className="header-logo-img"
-            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+          <img 
+            src={heroLogo} 
+            alt={t('appName')} 
+            className="header-logo-img" 
+          />
           <span className="header-logo-text">{t('appName')}</span>
         </div>
+
         <nav className="header-nav">
           {navItems.map(item => (
-            <button key={item.path} onClick={() => navigate(item.path)}
-              className={`header-nav-btn ${item.path && isActive(item.path) ? 'active' : ''}`}>
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`header-nav-btn ${item.path && isActive(item.path) ? 'active' : ''}`}
+              aria-label={item.label}
+            >
               {item.icon} {item.label}
             </button>
           ))}
         </nav>
+
         <div className="header-actions">
           <div className="language-switcher" ref={langMenuRef}>
-            <button className="header-icon-btn lang-btn" onClick={() => setShowLangMenu(!showLangMenu)}>
+            <button 
+              className="header-icon-btn lang-btn" 
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              aria-label={t('languageSwitcherLabel')}
+            >
               <FiGlobe size={18} />
             </button>
             {showLangMenu && (
               <div className="lang-dropdown">
                 {supportedLangs.map(l => (
-                  <button key={l.code} className={`lang-item ${lang === l.code ? 'active' : ''}`}
-                    onClick={() => { setLang(l.code); setShowLangMenu(false); }}>
+                  <button 
+                    key={l.code} 
+                    className={`lang-item ${lang === l.code ? 'active' : ''}`}
+                    onClick={() => { setLang(l.code); setShowLangMenu(false); }}
+                    aria-label={l.label}
+                  >
                     {l.label}
                   </button>
                 ))}
               </div>
             )}
           </div>
+
           <div className="notification-wrapper" ref={notifRef}>
-            <button className="header-icon-btn notification-bell" onClick={() => setShowNotif(!showNotif)}>
+            <button 
+              className="header-icon-btn notification-bell" 
+              onClick={() => setShowNotif(!showNotif)}
+              aria-label={t('notificationsLabel')}
+            >
               <FiBell size={18} />
               {unreadCount > 0 && <span className="header-badge">{unreadCount}</span>}
             </button>
@@ -93,33 +115,89 @@ export default function Header() {
               <div className="notification-dropdown">
                 <div className="notification-header">
                   <span>{t('notifications')}</span>
-                  {unreadCount > 0 && <button onClick={markAllAsRead} className="mark-all-btn"><FiCheck size={16} /> {t('markAllRead')}</button>}
+                  {unreadCount > 0 && (
+                    <button onClick={markAllAsRead} className="mark-all-btn" aria-label={t('markAllRead')}>
+                      <FiCheck size={16} /> {t('markAllRead')}
+                    </button>
+                  )}
                 </div>
                 <div className="notification-list">
-                  {notifications.length === 0 ? <p className="no-notifications">{t('noNotifications')}</p> : notifications.slice(0,10).map(n => (
-                    <div key={n.id} className={`notification-item ${!n.read ? 'unread' : ''}`}
-                      onClick={() => { if (!n.read) markAsRead(n.id); if (n.orderId) navigate('/my-orders'); setShowNotif(false); }}>
-                      <p className="notification-message">{n.message}</p>
-                      <span className="notification-time">{new Date(n.createdAt).toLocaleString(lang==='ar'?'ar-SA':lang==='de'?'de-DE':'en-US', {hour:'2-digit',minute:'2-digit'})}</span>
-                      {!n.read && <button className="mark-read-btn" onClick={e=>{e.stopPropagation();markAsRead(n.id);}}><FiCheck size={14}/></button>}
-                    </div>
-                  ))}
+                  {notifications.length === 0 ? (
+                    <p className="no-notifications">{t('noNotifications')}</p>
+                  ) : (
+                    notifications.slice(0, 10).map(n => (
+                      <div 
+                        key={n.id} 
+                        className={`notification-item ${!n.read ? 'unread' : ''}`}
+                        onClick={() => { 
+                          if (!n.read) markAsRead(n.id); 
+                          if (n.orderId) navigate('/my-orders'); 
+                          setShowNotif(false); 
+                        }}
+                      >
+                        <p className="notification-message">{n.message}</p>
+                        <span className="notification-time">
+                          {new Date(n.createdAt).toLocaleString(
+                            lang === 'ar' ? 'ar-SA' : lang === 'de' ? 'de-DE' : 'en-US',
+                            { hour: '2-digit', minute: '2-digit' }
+                          )}
+                        </span>
+                        {!n.read && (
+                          <button 
+                            className="mark-read-btn" 
+                            onClick={e => { e.stopPropagation(); markAsRead(n.id); }}
+                            aria-label={t('markRead')}
+                          >
+                            <FiCheck size={14} />
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
           </div>
-          <button className="header-icon-btn cart-btn" onClick={() => navigate('/cart')}>
+
+          <button 
+            className="header-icon-btn cart-btn" 
+            onClick={() => navigate('/cart')}
+            aria-label={t('cartLabel')}
+          >
             <FiShoppingCart size={18} />
-            {cartCount()>0 && <span className="header-badge">{cartCount()}</span>}
+            {cartCount() > 0 && <span className="header-badge">{cartCount()}</span>}
           </button>
-          <div style={{position:'relative'}}>
-            <button className="header-icon-btn" onClick={() => setShowMenu(!showMenu)}><FiUser size={18}/></button>
+
+          <div style={{ position: 'relative' }}>
+            <button 
+              className="header-icon-btn" 
+              onClick={() => setShowMenu(!showMenu)}
+              aria-label={t('userMenuLabel')}
+            >
+              <FiUser size={18} />
+            </button>
             {showMenu && (
               <div className="header-dropdown">
-                <button className="header-dropdown-item" onClick={()=>{navigate('/profile');setShowMenu(false);}}><FiUser size={16}/> {t('profile')}</button>
-                <button className="header-dropdown-item" onClick={()=>{navigate('/my-orders');setShowMenu(false);}}><FiList size={16}/> {t('orders')}</button>
-                <div className="header-dropdown-divider"/>
-                <button className="header-dropdown-item" onClick={()=>{logout();navigate('/');setShowMenu(false);}} style={{color:'#ef4444'}}><FiLogOut size={16}/> {t('logout')}</button>
+                <button 
+                  className="header-dropdown-item" 
+                  onClick={() => { navigate('/profile'); setShowMenu(false); }}
+                >
+                  <FiUser size={16} /> {t('profile')}
+                </button>
+                <button 
+                  className="header-dropdown-item" 
+                  onClick={() => { navigate('/my-orders'); setShowMenu(false); }}
+                >
+                  <FiList size={16} /> {t('orders')}
+                </button>
+                <div className="header-dropdown-divider" />
+                <button 
+                  className="header-dropdown-item" 
+                  onClick={() => { logout(); navigate('/'); setShowMenu(false); }}
+                  style={{ color: '#ef4444' }}
+                >
+                  <FiLogOut size={16} /> {t('logout')}
+                </button>
               </div>
             )}
           </div>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { useLanguage } from './LanguageContext';
 import {
   collection, addDoc, doc, setDoc, updateDoc, getDoc, getDocs,
   query, where, increment, serverTimestamp, limit
@@ -35,6 +36,7 @@ export const MESSAGE_PLACEMENTS = [
 
 export function CartProvider({ children }) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [items, setItems] = useState([]);
   const [deliveryMethod, setDeliveryMethod] = useState('standard');
   const [wrappingType, setWrappingType] = useState('basic');
@@ -49,7 +51,7 @@ export function CartProvider({ children }) {
   const [wrappingColor, setWrappingColor] = useState('#FF69B4');
   const [selectedAddons, setSelectedAddons] = useState([]);
 
-  // ✅ الإضافات الديناميكية من Firestore
+  // الإضافات الديناميكية من Firestore
   const [addonsList, setAddonsList] = useState([]);
 
   useEffect(() => {
@@ -59,8 +61,8 @@ export function CartProvider({ children }) {
         const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setAddonsList(list);
       } catch (err) {
-        console.error('فشل جلب الإضافات الديناميكية:', err);
-        setAddonsList([]); // نضمن بقاءها مصفوفة
+        console.error('Failed to fetch addons:', err);
+        setAddonsList([]);
       }
     };
     fetchAddons();
@@ -70,16 +72,13 @@ export function CartProvider({ children }) {
   const wrappingPrices = { basic: 5, premium: 12, luxury: 25 };
   const timePrices = { morning: 0, afternoon: 0, evening: 10, night: 20 };
 
-  // ✅ تعديل toggleAddon ليعمل بمعرف الإضافة (id) بدلاً من المفاتيح القديمة
   const toggleAddon = (addonId) => {
     setSelectedAddons(prev =>
       prev.includes(addonId) ? prev.filter(a => a !== addonId) : [...prev, addonId]
     );
   };
 
-  // ✅ حساب تكلفة الإضافات المختارة من القائمة الديناميكية
   const calculateAddonsCost = () => {
-    // إذا كانت addonsList فارغة، نستخدم الأسعار القديمة (للتوافق مع أي بيانات قديمة)
     if (addonsList.length === 0) {
       return selectedAddons.reduce((total, addonKey) => total + (ADDON_PRICES[addonKey] || 0), 0);
     }
@@ -99,12 +98,12 @@ export function CartProvider({ children }) {
       }
       return [...prev, { ...product, quantity }];
     });
-    toast.success('✅ تمت الإضافة إلى السلة');
+    toast.success(t('addedToCart'));
   };
 
   const removeFromCart = (id) => {
     setItems(prev => prev.filter(i => i.id !== id));
-    toast('🗑️ تم حذف المنتج');
+    toast(t('removedFromCart'));
   };
 
   const updateQty = (id, qty) => {
@@ -121,19 +120,16 @@ export function CartProvider({ children }) {
 
   const cartCount = () => items.reduce((t, i) => t + i.quantity, 0);
 
-  // ✅ الكوبونات (محدثة لدعم كوبونات المستخدم)
   const applyCouponToCart = async (code) => {
     try {
-      // البحث في كوبونات المتجر العامة
       const q = query(collection(db, 'coupons'), where('code', '==', code), where('used', '==', false));
       const snap = await getDocs(q);
       if (!snap.empty) {
         const coupon = { id: snap.docs[0].id, ...snap.docs[0].data() };
         setAppliedCoupon(coupon);
-        toast.success(`✅ تم تطبيق: ${coupon.name || coupon.code}`);
+        toast.success(`${t('couponApplied')}: ${coupon.name || coupon.code}`);
         return;
       }
-      // البحث في كوبونات المستخدم الخاصة
       if (user) {
         const userCouponQ = query(
           collection(db, 'userCoupons'),
@@ -145,19 +141,19 @@ export function CartProvider({ children }) {
         if (!userSnap.empty) {
           const coupon = { id: userSnap.docs[0].id, ...userSnap.docs[0].data() };
           setAppliedCoupon(coupon);
-          toast.success(`🎫 تم تطبيق كوبونك الخاص: ${coupon.name || coupon.code}`);
+          toast.success(`${t('couponApplied')}: ${coupon.name || coupon.code}`);
           return;
         }
       }
-      toast.error('❌ الكوبون غير صالح أو منتهي');
+      toast.error(t('couponInvalid'));
     } catch (err) {
-      toast.error('فشل التحقق من الكوبون');
+      toast.error(t('couponCheckFailed'));
     }
   };
 
   const removeCouponFromCart = () => {
     setAppliedCoupon(null);
-    toast('🚫 تم إلغاء الكوبون');
+    toast(t('couponRemoved'));
   };
 
   const calculateCost = () => {
@@ -173,10 +169,10 @@ export function CartProvider({ children }) {
     if (appliedCoupon && !appliedCoupon.used) {
       if (appliedCoupon.type === 'delivery') {
         discountAmount = (deliveryCost * appliedCoupon.discount) / 100;
-        discountLabel = `خصم ${appliedCoupon.discount}% على التوصيل`;
+        discountLabel = `${t('discount')} ${appliedCoupon.discount}% ${t('onDelivery')}`;
       } else if (appliedCoupon.type === 'product') {
         discountAmount = ((subtotal + addonsCost) * appliedCoupon.discount) / 100;
-        discountLabel = `خصم ${appliedCoupon.discount}% على المنتجات`;
+        discountLabel = `${t('discount')} ${appliedCoupon.discount}% ${t('onProducts')}`;
       }
     }
 
@@ -204,16 +200,15 @@ export function CartProvider({ children }) {
   const getUserDisplayName = () => {
     if (user?.firstName && user?.lastName) return `${user.firstName} ${user.lastName}`;
     if (user?.displayName) return user.displayName;
-    return user?.email || 'مستخدم';
+    return user?.email || t('guest');
   };
 
-  // ✅ توليد كوبون ولاء تلقائي بعد الطلب
   const generateLoyaltyCoupon = async () => {
     if (!user) return;
     const code = 'LOYAL' + Math.random().toString(36).substring(2, 8).toUpperCase();
     const couponData = {
       code,
-      name: 'كوبون الولاء',
+      name: t('loyaltyCouponName'),
       type: 'product',
       discount: 10,
       used: false,
@@ -225,26 +220,24 @@ export function CartProvider({ children }) {
       await addDoc(collection(db, 'userCoupons'), couponData);
       return code;
     } catch (err) {
-      console.error('فشل إنشاء كوبون الولاء', err);
+      console.error('Failed to generate loyalty coupon', err);
       return null;
     }
   };
 
-  // ✅ تقديم الطلب مع تفاصيل الإضافات الديناميكية
   const placeOrder = async (paymentMethod, transactionNumber = '') => {
     if (!user?.uid) {
-      toast.error('يجب تسجيل الدخول لإتمام الطلب');
+      toast.error(t('checkoutLoginRequired'));
       return null;
     }
     if (items.length === 0) {
-      toast.error('❌ السلة فارغة!');
+      toast.error(t('cartEmptyCheckout'));
       return null;
     }
 
     const costs = calculateCost();
     const customerName = getUserDisplayName();
 
-    // ✅ تحويل معرفات الإضافات إلى تفاصيل كاملة
     const selectedAddonDetails = selectedAddons.map(addonId => {
       const addon = addonsList.find(a => a.id === addonId);
       return addon ? { id: addon.id, name: addon.name, price: addon.price, icon: addon.icon } : null;
@@ -279,7 +272,7 @@ export function CartProvider({ children }) {
       messageColor,
       messagePlacement,
       wrappingColor,
-      selectedAddons: selectedAddonDetails, // ✅ نُخزّن التفاصيل الكاملة
+      selectedAddons: selectedAddonDetails,
       customer: {
         name: customerName,
         email: user.email,
@@ -287,15 +280,13 @@ export function CartProvider({ children }) {
         address: user.address || '',
       },
       status: 'pending',
-      statusText: 'قيد التجهيز',
+      statusText: t('statusPending'),
       createdAt: serverTimestamp(),
     };
 
     try {
-      // 1. حفظ الطلب
       const docRef = await addDoc(collection(db, 'orders'), orderData);
 
-      // 2. تحديث نقاط المستخدم وعدد الطلبات
       const userRef = doc(db, 'users', user.uid);
       try {
         await updateDoc(userRef, {
@@ -305,7 +296,7 @@ export function CartProvider({ children }) {
       } catch (updateErr) {
         if (updateErr.code === 'not-found') {
           await setDoc(userRef, {
-            firstName: user.firstName || user.displayName?.split(' ')[0] || 'مستخدم',
+            firstName: user.firstName || user.displayName?.split(' ')[0] || t('guest'),
             lastName: user.lastName || user.displayName?.split(' ').slice(1).join(' ') || '',
             email: user.email,
             role: user.role || 'user',
@@ -316,19 +307,17 @@ export function CartProvider({ children }) {
             createdAt: new Date().toISOString(),
           });
         } else {
-          console.error('فشل تحديث بيانات المستخدم:', updateErr);
+          console.error('Failed to update user data:', updateErr);
         }
       }
 
-      // 3. إنشاء كوبون ولاء تلقائي 🎫
       const couponCode = await generateLoyaltyCoupon();
       if (couponCode) {
-        toast.success(`🎉 تم الطلب! كوبون هدية: ${couponCode} (خصم 10% لطلبك القادم)`, { duration: 6000 });
+        toast.success(t('orderPlacedWithCoupon', { code: couponCode }), { duration: 6000 });
       } else {
-        toast.success('🎉 تم تقديم الطلب بنجاح!');
+        toast.success(t('orderPlacedSuccess'));
       }
 
-      // 4. تحديث الكوبون المُستخدم (عام أو خاص)
       if (appliedCoupon) {
         try {
           if (appliedCoupon.userId) {
@@ -344,26 +333,25 @@ export function CartProvider({ children }) {
             });
           }
         } catch (e) {
-          console.error('فشل تحديث الكوبون:', e);
+          console.error('Failed to update coupon:', e);
         }
       }
 
       clearCart();
       return { id: docRef.id, ...orderData };
     } catch (error) {
-      toast.error(error.message || '❌ فشل حفظ الطلب');
+      toast.error(error.message || t('orderSaveFailed'));
       return null;
     }
   };
 
-  // دالة حذف الطلب (للمستخدم)
   const deleteMyOrder = async (orderId) => {
     try {
-      await updateDoc(doc(db, 'orders', orderId), { status: 'cancelled', statusText: 'ملغي' });
-      toast.success('تم إلغاء الطلب');
+      await updateDoc(doc(db, 'orders', orderId), { status: 'cancelled', statusText: t('statusCancelled') });
+      toast.success(t('orderCancelled'));
       return true;
     } catch (err) {
-      toast.error('فشل إلغاء الطلب');
+      toast.error(t('orderCancelFailed'));
       return false;
     }
   };
@@ -382,7 +370,7 @@ export function CartProvider({ children }) {
     messagePlacement, setMessagePlacement,
     wrappingColor, setWrappingColor,
     selectedAddons, toggleAddon,
-    addonsList,               // ✅ إضافة addonsList
+    addonsList,
     ADDON_PRICES, MESSAGE_COLORS, MESSAGE_PLACEMENTS
   };
 

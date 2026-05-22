@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAdmin } from '../contexts/AdminContext';
 import AdminSidebar from '../components/Admin/AdminSidebar';
 import AdminHeader from '../components/Admin/AdminHeader';
-import { FiPlus, FiEdit2, FiTrash2, FiX, FiAlertTriangle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiX, FiAlertTriangle, FiUpload } from 'react-icons/fi';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../services/firebase';
 import toast from 'react-hot-toast';
 
-// دالة ضغط الصورة إلى Base64
-const compressImageToBase64 = (file, maxWidth = 300, quality = 0.5) => {
+// دالة ضغط الصورة وتحويلها إلى Blob (بدلاً من Base64)
+const compressImageToBlob = (file, maxWidth = 800, quality = 0.7) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -15,15 +17,21 @@ const compressImageToBase64 = (file, maxWidth = 300, quality = 0.5) => {
       img.src = e.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const ratio = maxWidth / img.width;
-        canvas.width = maxWidth;
-        canvas.height = img.height * ratio;
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const base64 = canvas.toDataURL('image/jpeg', quality);
-        resolve(base64);
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/jpeg', quality);
       };
-      img.onerror = () => reject(new Error('فشل تحميل الصورة للضغط'));
+      img.onerror = () => reject(new Error('فشل تحميل الصورة'));
     };
     reader.onerror = () => reject(new Error('فشل قراءة الملف'));
   });
@@ -34,7 +42,9 @@ export default function AdminProductsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '', price: '', image: '', description: '' });
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null); // ✅ حالة نافذة تأكيد الحذف
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const openAdd = () => {
     setEditing(null);
@@ -52,55 +62,72 @@ export default function AdminProductsPage() {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('حجم الصورة كبير جداً. الرجاء اختيار صورة أقل من 2 ميغابايت.');
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('حجم الصورة كبير جداً. الحد الأقصى 5 ميغابايت.');
       e.target.value = '';
       return;
     }
 
+    setUploading(true);
     try {
-      const base64 = await compressImageToBase64(file, 300, 0.5);
-      setForm({ ...form, image: base64 });
-      toast.success('تم تجهيز الصورة بنجاح');
+      // ضغط الصورة وتحويلها إلى Blob
+      const compressedBlob = await compressImageToBlob(file, 800, 0.7);
+      
+      // إنشاء اسم فريد للملف
+      const fileName = `products/${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+      const imageRef = ref(storage, fileName);
+      
+      // رفع إلى Firebase Storage
+      await uploadBytes(imageRef, compressedBlob, { contentType: 'image/jpeg' });
+      const downloadURL = await getDownloadURL(imageRef);
+      
+      // حفظ الرابط فقط في الحالة
+      setForm({ ...form, image: downloadURL });
+      toast.success('تم رفع الصورة بنجاح');
     } catch (err) {
       console.error(err);
-      toast.error('تعذر معالجة الصورة.');
-      e.target.value = '';
+      toast.error('فشل رفع الصورة، حاول مرة أخرى');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!form.name || !form.price) {
+      toast.error('الاسم والسعر مطلوبان');
+      return;
+    }
+    
     const finalData = {
       name: form.name,
       price: parseFloat(form.price),
-      description: form.description,
-      image: form.image || '🌸',
+      description: form.description || '',
+      image: form.image || '', // الآن الرابط أو فارغ
     };
 
     try {
       if (editing) {
-        updateProduct(editing.id, finalData);
+        await updateProduct(editing.id, finalData);
+        toast.success('تم تحديث المنتج');
       } else {
-        addProduct(finalData);
+        await addProduct(finalData);
+        toast.success('تم إضافة المنتج بنجاح');
       }
-      toast.success(editing ? 'تم تحديث المنتج' : 'تم إضافة المنتج بنجاح');
       setShowModal(false);
     } catch (error) {
-      console.error('فشل في حفظ المنتج:', error);
-      toast.error('حدث خطأ أثناء الحفظ. الرجاء المحاولة مرة أخرى.');
+      console.error(error);
+      toast.error('حدث خطأ أثناء الحفظ');
     }
   };
 
-  // ✅ فتح نافذة تأكيد الحذف
-  const handleDeleteClick = (id) => {
-    setConfirmDeleteId(id);
-  };
+  const handleDeleteClick = (id) => setConfirmDeleteId(id);
 
-  // ✅ تأكيد الحذف بعد النافذة
   const confirmDelete = async () => {
     if (confirmDeleteId) {
-      deleteProduct(confirmDeleteId);
+      await deleteProduct(confirmDeleteId);
       toast.success('تم حذف المنتج');
       setConfirmDeleteId(null);
     }
@@ -147,10 +174,10 @@ export default function AdminProductsPage() {
                   <tr key={p.id}>
                     <td>
                       <div className="admin-product-thumb">
-                        {p.image && (p.image.startsWith('http') || p.image.startsWith('data:') || p.image.startsWith('/')) ? (
-                          <img src={p.image} alt={p.name} />
+                        {p.image && (p.image.startsWith('http') || p.image.startsWith('https')) ? (
+                          <img src={p.image} alt={p.name} loading="lazy" />
                         ) : (
-                          <span className="emoji-fallback">{p.image || '🌸'}</span>
+                          <span className="emoji-fallback">🌸</span>
                         )}
                       </div>
                     </td>
@@ -163,11 +190,7 @@ export default function AdminProductsPage() {
                       <button className="btn btn-primary btn-sm" style={{ marginRight: '8px' }} onClick={() => openEdit(p)} aria-label={`تعديل ${p.name}`}>
                         <FiEdit2 />
                       </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDeleteClick(p.id)}
-                        aria-label={`حذف ${p.name}`}
-                      >
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteClick(p.id)} aria-label={`حذف ${p.name}`}>
                         <FiTrash2 />
                       </button>
                     </td>
@@ -178,42 +201,75 @@ export default function AdminProductsPage() {
           </table>
         </div>
 
+        {/* Modal for Add/Edit */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
               <div className="modal-header">
                 <h2 className="modal-title">{editing ? 'تعديل' : 'إضافة'} منتج</h2>
-                <button className="modal-close" onClick={() => setShowModal(false)} aria-label="إغلاق النافذة"><FiX /></button>
+                <button className="modal-close" onClick={() => setShowModal(false)} aria-label="إغلاق النافذة">
+                  <FiX />
+                </button>
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="product-name" className="form-label">الاسم</label>
-                  <input id="product-name" name="name" className="form-input" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+                  <input
+                    id="product-name"
+                    className="form-input"
+                    value={form.name}
+                    onChange={e => setForm({ ...form, name: e.target.value })}
+                    required
+                  />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="product-price" className="form-label">السعر</label>
-                  <input id="product-price" name="price" className="form-input" type="number" step="0.01" value={form.price} onChange={e => setForm({...form, price: e.target.value})} required />
+                  <label htmlFor="product-price" className="form-label">السعر ($)</label>
+                  <input
+                    id="product-price"
+                    className="form-input"
+                    type="number"
+                    step="0.01"
+                    value={form.price}
+                    onChange={e => setForm({ ...form, price: e.target.value })}
+                    required
+                  />
                 </div>
                 <div className="form-group">
                   <label htmlFor="product-desc" className="form-label">الوصف</label>
-                  <input id="product-desc" name="description" className="form-input" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+                  <textarea
+                    id="product-desc"
+                    className="form-input"
+                    rows="3"
+                    value={form.description}
+                    onChange={e => setForm({ ...form, description: e.target.value })}
+                  />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="product-image" className="form-label">صورة المنتج</label>
-                  <input
-                    id="product-image"
-                    type="file"
-                    accept="image/*"
-                    className="form-input"
-                    onChange={handleImageChange}
-                  />
-                  {form.image && (
-                    <div className="image-preview-container">
-                      <img src={form.image} alt="معاينة" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', marginTop: '8px' }} />
-                    </div>
-                  )}
+                  <label className="form-label">صورة المنتج</label>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <FiUpload /> {uploading ? 'جاري الرفع...' : 'اختر صورة'}
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      style={{ display: 'none' }}
+                      onChange={handleImageChange}
+                    />
+                    {form.image && (
+                      <div className="image-preview-container">
+                        <img src={form.image} alt="معاينة" />
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <button type="submit" className="btn btn-primary btn-full">
+                <button type="submit" className="btn btn-primary btn-full" disabled={uploading}>
                   {editing ? 'تحديث' : 'إضافة'}
                 </button>
               </form>
@@ -221,7 +277,7 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        {/* ✅ نافذة تأكيد الحذف المخصصة */}
+        {/* Delete confirmation modal */}
         {confirmDeleteId && (
           <div className="modal-overlay" onClick={() => setConfirmDeleteId(null)}>
             <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', textAlign: 'center' }}>
@@ -229,7 +285,7 @@ export default function AdminProductsPage() {
                 <FiAlertTriangle size={50} color="#f59e0b" />
               </div>
               <h3 className="confirm-title">تأكيد الحذف</h3>
-              <p className="confirm-text">هل أنت متأكد من رغبتك في حذف هذا المنتج؟</p>
+              <p className="confirm-text">هل أنت متأكد من رغبتك في حذف هذا المنتج نهائياً؟</p>
               <div className="confirm-actions">
                 <button onClick={confirmDelete} className="btn btn-danger">نعم، احذف</button>
                 <button onClick={() => setConfirmDeleteId(null)} className="btn btn-secondary">إلغاء</button>

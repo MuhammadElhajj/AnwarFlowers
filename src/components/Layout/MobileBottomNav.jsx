@@ -16,20 +16,21 @@ export default function MobileBottomNav() {
     { path: '/products', icon: <FiPackage size={20} />, label: t('products') },
     { path: '/cart', icon: <FiShoppingCart size={20} />, label: t('cart'), badge: cartCount() },
     { path: '/my-orders', icon: <FiList size={20} />, label: t('orders') },
-    { path: '/chat', icon: <FiHeadphones size={20} />, label: 'الدعم' },
+    { path: '/chat', icon: <FiHeadphones size={20} />, label: t('support') },
   ];
 
   return (
-    <nav className="mobile-bottom-nav">
+    <nav className="mobile-bottom-nav" aria-label={t('bottomNavigation')}>
       <div className="mobile-bottom-nav-inner">
         {navItems.map(item => (
           <button
             key={item.path}
             className={`bottom-nav-item ${isActive(item.path) ? 'active' : ''}`}
             onClick={() => navigate(item.path)}
+            aria-label={item.label}
           >
             {item.icon}
-            {item.badge > 0 && <span className="bottom-nav-badge">{item.badge}</span>}
+            {item.badge > 0 && <span className="bottom-nav-badge" aria-label={`${item.badge} ${t('items')}`}>{item.badge}</span>}
             <span>{item.label}</span>
           </button>
         ))}

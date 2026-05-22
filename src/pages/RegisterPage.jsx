@@ -1,94 +1,91 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { useLanguage } from '../contexts/LanguageContext'
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { FiMail, FiLock, FiUser, FiLogIn } from 'react-icons/fi';
 
 export default function RegisterPage() {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [verificationSent, setVerificationSent] = useState(false)
-  const { register, loginWithGoogle } = useAuth() // تمت إضافة loginWithGoogle
-  const { t } = useLanguage()
-  const navigate = useNavigate()
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [verificationSent, setVerificationSent] = useState(false);
+  const { register, loginWithGoogle } = useAuth();
+  const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setVerificationSent(false)
+    e.preventDefault();
+    setError('');
+    setVerificationSent(false);
     
     if (password !== confirmPassword) {
-      setError('كلمة المرور غير متطابقة')
-      return
+      setError(t('passwordMismatch'));
+      return;
     }
     if (password.length < 6) {
-      setError('كلمة المرور 6 أحرف على الأقل')
-      return
+      setError(t('passwordMinLength'));
+      return;
     }
     
-    setLoading(true)
+    setLoading(true);
     try {
-      const result = await register(firstName, lastName, email, password)
-      setLoading(false)
+      const result = await register(firstName, lastName, email, password);
+      setLoading(false);
       
       if (result === true) {
-        // تم التسجيل بنجاح دون الحاجة للتحقق (قد يكون مسموحًا به في إعدادات الخادم)
-        navigate('/dashboard')
+        navigate('/dashboard');
       } else if (result && result.needVerification) {
-        // التسجيل يتطلب تأكيد البريد الإلكتروني
-        setVerificationSent(true)
+        setVerificationSent(true);
       } else {
-        // فشل التسجيل (الخطأ يظهر عبر toast في AuthContext)
-        setError('فشل التسجيل. يرجى المحاولة مرة أخرى.')
+        setError(t('registerFailed'));
       }
     } catch (err) {
-      setLoading(false)
-      setError(err.message || 'فشل التسجيل. يرجى المحاولة مرة أخرى.')
+      setLoading(false);
+      setError(err.message || t('registerFailed'));
     }
-  }
+  };
 
-  // تسجيل الدخول باستخدام Google
   const handleGoogleSignup = async () => {
-    setError('')
-    setLoading(true)
+    setError('');
+    setLoading(true);
     try {
-      const ok = await loginWithGoogle()
-      setLoading(false)
+      const ok = await loginWithGoogle();
+      setLoading(false);
       if (ok) {
-        navigate('/dashboard')
+        navigate('/dashboard');
+      } else {
+        setError(t('googleRegisterFailed'));
       }
     } catch (err) {
-      setLoading(false)
-      setError(err.message || 'فشل التسجيل بحساب Google')
+      setLoading(false);
+      setError(err.message || t('googleRegisterFailed'));
     }
-  }
+  };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          {/* <div className="auth-logo">🌸</div> */}
-          <h1 className="auth-title">Register page</h1>
+          <h1 className="auth-title">{t('registerTitle')}</h1>
           <p className="auth-subtitle">{t('registerTitle')}</p>
         </div>
         
         {verificationSent ? (
           <div className="auth-success">
-            <h2>تم إرسال رابط التأكيد!</h2>
-            <p>يرجى التحقق من بريدك الإلكتروني (<strong>{email}</strong>) وتأكيد الحساب قبل تسجيل الدخول.</p>
+            <h2>{t('verificationSentTitle')}</h2>
+            <p dangerouslySetInnerHTML={{ __html: t('verificationSentMessage').replace('{{email}}', `<strong>${email}</strong>`) }} />
             <button className="auth-submit-btn" onClick={() => navigate('/')}>
-              العودة إلى تسجيل الدخول
+              {t('backToLogin')}
             </button>
           </div>
         ) : (
           <>
             {error && <div className="auth-error">{error}</div>}
             
-            {/* زر التسجيل بحساب Google */}
             <button
               type="button"
               onClick={handleGoogleSignup}
@@ -102,37 +99,89 @@ export default function RegisterPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              التسجيل بحساب Google
+              {t('registerWithGoogle')}
             </button>
 
-            {/* فاصل "أو" */}
             <div className="auth-divider">
-              <span className="auth-divider-text">أو</span>
+              <span className="auth-divider-text">{t('or')}</span>
             </div>
 
             <form className="auth-form" onSubmit={handleSubmit}>
               <div className="auth-input-group">
-                <label className="auth-label">{t('firstName')}</label>
-                <input type="text" className="auth-input" value={firstName} onChange={(e) => setFirstName(e.target.value)} required disabled={loading} />
+                <label className="auth-label">
+                  <FiUser size={14} style={{ marginRight: '6px' }} />
+                  {t('firstName')}
+                </label>
+                <input
+                  type="text"
+                  className="auth-input"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  disabled={loading}
+                />
               </div>
               <div className="auth-input-group">
-                <label className="auth-label">{t('lastName')}</label>
-                <input type="text" className="auth-input" value={lastName} onChange={(e) => setLastName(e.target.value)} required disabled={loading} />
+                <label className="auth-label">
+                  <FiUser size={14} style={{ marginRight: '6px' }} />
+                  {t('lastName')}
+                </label>
+                <input
+                  type="text"
+                  className="auth-input"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  disabled={loading}
+                />
               </div>
               <div className="auth-input-group">
-                <label className="auth-label">{t('email')}</label>
-                <input type="email" className="auth-input" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={loading} />
+                <label className="auth-label">
+                  <FiMail size={14} style={{ marginRight: '6px' }} />
+                  {t('email')}
+                </label>
+                <input
+                  type="email"
+                  className="auth-input"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                />
               </div>
               <div className="auth-input-group">
-                <label className="auth-label">{t('password')}</label>
-                <input type="password" className="auth-input" placeholder="6 أحرف على الأقل" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={loading} />
+                <label className="auth-label">
+                  <FiLock size={14} style={{ marginRight: '6px' }} />
+                  {t('password')}
+                </label>
+                <input
+                  type="password"
+                  className="auth-input"
+                  placeholder={t('passwordMinLength')}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                />
               </div>
               <div className="auth-input-group">
-                <label className="auth-label">تأكيد كلمة المرور</label>
-                <input type="password" className="auth-input" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={loading} />
+                <label className="auth-label">
+                  <FiLock size={14} style={{ marginRight: '6px' }} />
+                  {t('confirmPassword')}
+                </label>
+                <input
+                  type="password"
+                  className="auth-input"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                />
               </div>
               <button type="submit" className="auth-submit-btn" disabled={loading}>
-                {loading ? '⏳ جاري إنشاء الحساب...' : `🌸 ${t('register')}`}
+                {loading ? t('creatingAccount') : t('registerButton')}
               </button>
             </form>
             <div className="auth-footer">
@@ -145,5 +194,5 @@ export default function RegisterPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

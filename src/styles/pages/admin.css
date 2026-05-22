@@ -276,3 +276,11 @@
   font-size: 0.9rem;
   margin: 0;
 }
+
+.admin-layout__body {
+  display: flex;
+}
+
+.admin-layout__main {
+  flex: 1;
+}

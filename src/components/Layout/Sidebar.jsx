@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useRewards } from '../../contexts/RewardsContext';
 import { useCart } from '../../contexts/CartContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -13,6 +14,7 @@ import toast from 'react-hot-toast';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const { points, level, levels, ordersCount, progressPercent, pointsToNextLevel } = useRewards();
   const { calculateCost, applyCouponToCart, removeCouponFromCart, appliedCoupon } = useCart();
   const navigate = useNavigate();
@@ -69,7 +71,7 @@ export default function Sidebar() {
   const handleCouponClick = (coupon) => {
     if (appliedCoupon?.id === coupon.id || appliedCoupon?.code === coupon.code) {
       removeCouponFromCart();
-      toast.success('تم إلغاء الكوبون');
+      toast.success(t('couponRemoved'));
       return;
     }
     applyCouponToCart(coupon.code);
@@ -98,7 +100,11 @@ export default function Sidebar() {
 
   return (
     <>
-      <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}>
+      <button 
+        className="sidebar-toggle" 
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? t('closeSidebar') : t('openSidebar')}
+      >
         {isOpen ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
       </button>
 
@@ -106,17 +112,17 @@ export default function Sidebar() {
 
       <aside className={`dashboard-sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-inner">
-          {/* الملف الشخصي */}
+          {/* Profile */}
           <div className="sidebar-profile">
             <div className="sidebar-avatar-wrapper">
               <div className="sidebar-avatar">
                 {user?.profileImage ? (
-                  <img src={user.profileImage} alt="" />
+                  <img src={user.profileImage} alt={t('profileImage')} />
                 ) : (
                   user?.firstName?.[0]?.toUpperCase() || <FiAward size={36} />
                 )}
               </div>
-              <div className="sidebar-avatar-online" />
+              <div className="sidebar-avatar-online" aria-label={t('online')} />
             </div>
             <div className="sidebar-username">{user?.firstName} {user?.lastName}</div>
             <div className="sidebar-email">{user?.email}</div>
@@ -129,40 +135,44 @@ export default function Sidebar() {
             </div>
           </div>
 
-          {/* التقدم والمستوى */}
+          {/* Progress */}
           <div className="sidebar-progress-section">
             <div className="sidebar-progress-header">
               <span className="sidebar-progress-label">
-                <FiTrendingUp size={12} /> التقدم
+                <FiTrendingUp size={12} /> {t('progress')}
               </span>
-              <span className="sidebar-progress-value">{ordersCount} طلبات</span>
+              <span className="sidebar-progress-value">{ordersCount} {t('ordersCount')}</span>
             </div>
             <div className="sidebar-progress-bar">
               <div className="sidebar-progress-fill" style={{ width: `${progressPercent()}%` }} />
             </div>
             {pointsToNextLevel() > 0 && (
               <div className="sidebar-next-level">
-                {pointsToNextLevel()} طلبات للمستوى التالي
+                {pointsToNextLevel()} {t('ordersToNextLevel')}
               </div>
             )}
           </div>
 
-          {/* النقاط */}
+          {/* Points */}
           <div className="sidebar-points-display">
             <span className="sidebar-points-icon"><FiAward size={24} /></span>
             <div>
               <div className="sidebar-points-value">{points.toLocaleString()}</div>
-              <div className="sidebar-points-label">نقطة مكافآت</div>
+              <div className="sidebar-points-label">{t('rewardPoints')}</div>
             </div>
           </div>
 
-          {/* الكوبونات المتاحة */}
+          {/* Coupons */}
           <div className="sidebar-coupons-section">
             <div className="sidebar-coupons-header-row">
               <div className="sidebar-coupons-title">
-                <FiGift size={16} /> الكوبونات المتاحة
+                <FiGift size={16} /> {t('availableCoupons')}
               </div>
-              <button className="sidebar-coupons-refresh-btn" onClick={fetchUserCoupons} title="تحديث الكوبونات">
+              <button 
+                className="sidebar-coupons-refresh-btn" 
+                onClick={fetchUserCoupons} 
+                aria-label={t('refreshCoupons')}
+              >
                 <FiRefreshCw size={14} />
               </button>
             </div>
@@ -171,24 +181,28 @@ export default function Sidebar() {
               <div className="applied-coupon-banner">
                 <div>
                   <div className="applied-coupon-name">
-                    <FiGift size={16} /> {appliedCoupon.name || 'كوبون'} نشط
+                    <FiGift size={16} /> {appliedCoupon.name || t('coupon')} {t('active')}
                   </div>
                   <div className="applied-coupon-details">
-                    خصم {appliedCoupon.discount}% | توفير {getDiscountAmount(appliedCoupon)}
+                    {t('discount')} {appliedCoupon.discount}% | {t('saving')} {getDiscountAmount(appliedCoupon)}
                   </div>
                 </div>
-                <button className="remove-coupon-btn" onClick={() => { removeCouponFromCart(); toast.success('تم إلغاء الكوبون'); }}>
+                <button 
+                  className="remove-coupon-btn" 
+                  onClick={() => { removeCouponFromCart(); toast.success(t('couponRemoved')); }}
+                  aria-label={t('remove')}
+                >
                   <FiX size={18} />
                 </button>
               </div>
             )}
 
             {loadingCoupons ? (
-              <p className="sidebar-loading-text">جاري تحميل الكوبونات...</p>
+              <p className="sidebar-loading-text">{t('loadingCoupons')}</p>
             ) : userCoupons.length === 0 ? (
               <p className="sidebar-empty-coupons">
                 <FiShoppingBag size={20} /><br />
-                أكمل طلباتك للحصول على كوبونات خصم
+                {t('completeOrdersForCoupons')}
               </p>
             ) : (
               <div className="sidebar-coupons-list">
@@ -207,17 +221,17 @@ export default function Sidebar() {
                       )}
                       <div className="coupon-header">
                         <span className="coupon-icon"><FiGift size={18} /></span>
-                        <span className="coupon-name">{coupon.name || 'كوبون خصم'}</span>
+                        <span className="coupon-name">{coupon.name || t('discountCoupon')}</span>
                       </div>
                       <div className="coupon-desc">
-                        خصم {coupon.discount}% {coupon.type === 'delivery' ? 'على التوصيل' : 'على المنتجات'}
+                        {t('discount')} {coupon.discount}% {coupon.type === 'delivery' ? t('onDelivery') : t('onProducts')}
                       </div>
                       <div className="coupon-discount">
-                        صالح حتى {formatExpiry(coupon.expiresAt)} | توفير {getDiscountAmount(coupon)}
+                        {t('validUntil')} {formatExpiry(coupon.expiresAt)} | {t('saving')} {getDiscountAmount(coupon)}
                       </div>
                       <div className="coupon-code">{coupon.code}</div>
-                      {!applied && <div className="coupon-action-hint">اضغط للتطبيق</div>}
-                      {applied && <div className="coupon-action-hint applied">✅ مُطبق – اضغط للإلغاء</div>}
+                      {!applied && <div className="coupon-action-hint">{t('clickToApply')}</div>}
+                      {applied && <div className="coupon-action-hint applied">{t('appliedClickToCancel')}</div>}
                     </div>
                   );
                 })}
@@ -226,8 +240,8 @@ export default function Sidebar() {
           </div>
 
           <div className="sidebar-footer">
-            <button className="sidebar-logout-btn" onClick={handleLogout}>
-              <FiLogOut size={16} /> تسجيل الخروج
+            <button className="sidebar-logout-btn" onClick={handleLogout} aria-label={t('logout')}>
+              <FiLogOut size={16} /> {t('logout')}
             </button>
           </div>
         </div>

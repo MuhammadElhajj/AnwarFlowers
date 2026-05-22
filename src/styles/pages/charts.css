@@ -1,0 +1,248 @@
+/* ========================================
+   Charts & Ratings – BarChart + StarRating
+   ======================================== */
+
+/* ========== Bar Chart ========== */
+.bar-chart-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+  height: 260px;
+  padding: 0 20px;
+  position: relative;
+}
+
+.bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+
+.bar-value-display {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.bar-graphic {
+  width: 100%;
+  max-width: 80px;
+  border-radius: 16px 16px 0 0;
+  transition: all 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 4px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.bar-graphic::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.5) 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 100%);
+  border-radius: 16px 16px 0 0;
+}
+
+.bar-label-text {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ========== Star Rating ========== */
+.rating-wrapper {
+  position: relative;
+}
+
+.rating-overall-display {
+  text-align: center;
+  padding: 20px 0 28px;
+}
+
+.rating-big-number {
+  font-size: 5rem;
+  font-weight: 900;
+  background: linear-gradient(180deg, #fef3c7, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+
+.rating-stars-display {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.rating-star-icon {
+  font-size: 1.5rem;
+  color: #fbbf24;
+}
+.rating-star-icon.empty {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.rating-total-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 10px;
+}
+
+/* توزيع التقييمات */
+.rating-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.rating-row-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rating-star-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-progress-bg {
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rating-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  border-radius: 8px;
+  transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+}
+
+.rating-count-number {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* قسم التقييم التفاعلي */
+.rate-section {
+  text-align: center;
+  padding: 20px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rate-section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.rate-stars-container {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.rate-star-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.rate-star-btn:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  transform: translateY(-8px) scale(1.1);
+}
+.rate-star-btn.active {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.already-rated-message {
+  text-align: center;
+  padding: 16px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 14px;
+  color: #10b981;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.thank-you-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 24px;
+  z-index: 10;
+}
+.thank-you-content {
+  text-align: center;
+}
+.thank-you-emoji {
+  font-size: 4rem;
+  animation: float 2s ease-in-out infinite;
+}
+.thank-you-text {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* استجابة */
+@media (max-width: 768px) {
+  .bar-chart-container { height: 200px; gap: 20px; }
+  .bar-graphic { max-width: 60px; }
+  .rate-star-btn { width: 44px; height: 44px; font-size: 1.2rem; }
+}
+@media (max-width: 480px) {
+  .bar-chart-container { height: 160px; gap: 14px; }
+  .bar-value-display { font-size: 0.9rem; }
+  .bar-graphic { max-width: 50px; }
+  .rate-star-btn { width: 38px; height: 38px; }
+}

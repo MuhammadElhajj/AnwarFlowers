@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { useLanguage } from './LanguageContext';
 import { doc, getDoc, updateDoc, increment, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import toast from 'react-hot-toast';
@@ -14,25 +15,27 @@ export function useRewards() {
 
 export function RewardsProvider({ children }) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [points, setPoints] = useState(0);
   const [level, setLevel] = useState('new');
   const [coupons, setCoupons] = useState([]);
   const [ordersCount, setOrdersCount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
 
-  // مستويات العضوية
+  // مستويات العضوية – تستخدم الترجمة لاحقاً
   const levels = {
-    new: { name: 'عميل جديد', icon: '🌱', color: '#10b981', min: 0, max: 1 },
-    bronze: { name: 'برونزي', icon: '🥉', color: '#cd7f32', min: 1, max: 3 },
-    silver: { name: 'فضي', icon: '🥈', color: '#c0c0c0', min: 3, max: 5 },
-    gold: { name: 'ذهبي', icon: '🥇', color: '#f59e0b', min: 5, max: 10 },
-    diamond: { name: 'الماسي', icon: '💎', color: '#a855f7', min: 10, max: 999 },
+    new: { name: t('levelNew'), icon: '🌱', color: '#10b981', min: 0, max: 1 },
+    bronze: { name: t('levelBronze'), icon: '🥉', color: '#cd7f32', min: 1, max: 3 },
+    silver: { name: t('levelSilver'), icon: '🥈', color: '#c0c0c0', min: 3, max: 5 },
+    gold: { name: t('levelGold'), icon: '🥇', color: '#f59e0b', min: 5, max: 10 },
+    diamond: { name: t('levelDiamond'), icon: '💎', color: '#a855f7', min: 10, max: 999 },
   };
 
+  // كوبونات افتراضية – تستخدم الترجمة
   const availableCoupons = [
-    { id: 'first_order', name: 'خصم 15% على التوصيل', description: 'للطلب الأول', discount: 15, type: 'delivery', requiredOrders: 1, icon: '🚚', color: '#3b82f6' },
-    { id: 'second_order', name: 'خصم 50% على التوصيل', description: 'للطلب الثاني', discount: 50, type: 'delivery', requiredOrders: 2, icon: '🚀', color: '#8b5cf6' },
-    { id: 'third_order', name: 'خصم 15% على المنتج', description: 'للطلب الثالث فأكثر', discount: 15, type: 'product', requiredOrders: 3, icon: '🎁', color: '#f59e0b' },
+    { id: 'first_order', name: t('couponFirstOrder'), description: t('couponFirstOrderDesc'), discount: 15, type: 'delivery', requiredOrders: 1, icon: '🚚', color: '#3b82f6' },
+    { id: 'second_order', name: t('couponSecondOrder'), description: t('couponSecondOrderDesc'), discount: 50, type: 'delivery', requiredOrders: 2, icon: '🚀', color: '#8b5cf6' },
+    { id: 'third_order', name: t('couponThirdOrder'), description: t('couponThirdOrderDesc'), discount: 15, type: 'product', requiredOrders: 3, icon: '🎁', color: '#f59e0b' },
   ];
 
   const POINTS_PER_ORDER = 100;
@@ -50,18 +53,18 @@ export function RewardsProvider({ children }) {
           setCoupons(data.coupons || []);
           setAppliedCoupon(data.appliedCoupon || null);
           
-          // تحديد المستوى
+          // تحديد المستوى (يتم التقييم بناءً على القيم، والتسمية من levels المترجمة)
           const userLevel = Object.entries(levels).find(([key, val]) =>
             (data.ordersCount || 0) >= val.min && (data.ordersCount || 0) < val.max
           )?.[0] || 'diamond';
           setLevel(userLevel);
         }
       } catch (err) {
-        console.error('فشل تحميل المكافآت:', err);
+        console.error(t('rewardsLoadFailed'), err);
       }
     };
     fetchRewards();
-  }, [user]);
+  }, [user, t]);
 
   // دالة مساعدة لتحديث بيانات المستخدم في Firestore
   const updateUserRewards = async (updates) => {
@@ -70,7 +73,7 @@ export function RewardsProvider({ children }) {
     await setDoc(userRef, updates, { merge: true });
   };
 
-  // إضافة نقاط بعد طلب جديد (تُستدعى عادة من CartContext بعد الطلب الناجح)
+  // إضافة نقاط بعد طلب جديد
   const addOrderPoints = async () => {
     const newPoints = points + POINTS_PER_ORDER;
     const newOrderCount = ordersCount + 1;
@@ -82,7 +85,7 @@ export function RewardsProvider({ children }) {
     availableCoupons.forEach(coupon => {
       if (newOrderCount >= coupon.requiredOrders && !newCoupons.find(c => c.id === coupon.id)) {
         newCoupons.push({ ...coupon, earnedAt: new Date().toISOString(), used: false });
-        toast.success(`🎉 حصلت على كوبون: ${coupon.name}!`, { duration: 5000 });
+        toast.success(t('couponEarned', { name: coupon.name }), { duration: 5000 });
       }
     });
     setCoupons(newCoupons);
@@ -94,7 +97,7 @@ export function RewardsProvider({ children }) {
       coupons: newCoupons,
     });
 
-    toast.success(`✨ +${POINTS_PER_ORDER} نقطة!`, { duration: 3000 });
+    toast.success(t('pointsEarned', { points: POINTS_PER_ORDER }), { duration: 3000 });
   };
 
   // تطبيق كوبون
@@ -102,12 +105,11 @@ export function RewardsProvider({ children }) {
     const coupon = coupons.find(c => c.id === couponId && !c.used);
     if (coupon) {
       setAppliedCoupon(coupon);
-      // تحديث Firestore
       updateUserRewards({ appliedCoupon: coupon });
-      toast.success(`✅ تم تطبيق: ${coupon.name}`);
+      toast.success(t('couponApplied', { name: coupon.name }));
       return coupon;
     }
-    toast.error('الكوبون غير متاح');
+    toast.error(t('couponNotAvailable'));
     return null;
   };
 

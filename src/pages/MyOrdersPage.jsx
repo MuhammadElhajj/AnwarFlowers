@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { formatDateTime } from '../utils/dateUtils';
+import toast from 'react-hot-toast';
 import Header from '../components/Layout/Header';
 import Sidebar from '../components/Layout/Sidebar';
 import {
@@ -15,6 +17,7 @@ import '../styles/pages/user-pages-shared.css';
 
 export default function MyOrdersPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { deleteMyOrder } = useCart();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -47,13 +50,13 @@ export default function MyOrdersPage() {
       });
       setOrders(list);
     } catch (err) {
-      console.error('فشل جلب الطلبات:', err);
-      setError(err.message || 'فشل تحميل الطلبات');
+      console.error(t('failedToLoadOrders'), err);
+      setError(t('failedToLoadOrders'));
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => {
     fetchOrders();
@@ -77,45 +80,78 @@ export default function MyOrdersPage() {
   const handleConfirmCancel = async () => {
     if (confirmModal.orderId) {
       const success = await deleteMyOrder(confirmModal.orderId);
-      if (success) fetchOrders();
+      if (success) {
+        toast.success(t('orderCancelledSuccess'));
+        fetchOrders();
+      } else {
+        toast.error(t('orderCancelFailed'));
+      }
     }
     closeConfirmModal();
   };
 
   const statusBadge = (status) => {
     const map = {
-      pending: 'badge-pending', confirmed: 'badge-confirmed',
-      shipped: 'badge-shipped', delivered: 'badge-delivered', cancelled: 'badge-cancelled'
+      pending: 'badge-pending',
+      confirmed: 'badge-confirmed',
+      shipped: 'badge-shipped',
+      delivered: 'badge-delivered',
+      cancelled: 'badge-cancelled'
     };
     return map[status] || 'badge-pending';
   };
 
+  const getStatusText = (status) => {
+    const map = {
+      pending: t('statusPending'),
+      confirmed: t('statusConfirmed'),
+      shipped: t('statusShipped'),
+      delivered: t('statusDelivered'),
+      cancelled: t('statusCancelled')
+    };
+    return map[status] || t('processing');
+  };
+
   const formatDateSafe = (dateStr) => {
-    if (!dateStr) return 'غير معروف';
+    if (!dateStr) return t('unknown');
     try { return formatDateTime(dateStr); }
     catch { return dateStr; }
   };
 
   const getAddonLabel = (key) => {
-    const labels = { glitter: '✨ لمعان', spray: '🌿 رشة', crown: '👑 تاج', teddy: '🧸 دبدوب' };
+    const labels = {
+      glitter: t('addonGlitter'),
+      spray: t('addonSpray'),
+      crown: t('addonCrown'),
+      teddy: t('addonTeddy')
+    };
     return labels[key] || key;
   };
 
   const getColorName = (hex) => {
     const names = {
-      '#FFD700': 'ذهبي', '#FFFFFF': 'أبيض', '#000000': 'أسود',
-      '#FF0000': 'أحمر', '#FF69B4': 'وردي', '#C0C0C0': 'فضي'
+      '#FFD700': t('colorGold'),
+      '#FFFFFF': t('colorWhite'),
+      '#000000': t('colorBlack'),
+      '#FF0000': t('colorRed'),
+      '#FF69B4': t('colorPink'),
+      '#C0C0C0': t('colorSilver')
     };
     return names[hex] || hex;
   };
 
+  const getPlacementText = (placement) => {
+    const map = {
+      card: t('placementCard'),
+      ribbon: t('placementRibbon'),
+      inside: t('placementInside')
+    };
+    return map[placement] || placement;
+  };
+
   const isImageUrl = (str) => {
     if (!str || typeof str !== 'string') return false;
-    return (
-      str.startsWith('http') ||
-      str.startsWith('data:') ||
-      str.startsWith('/')
-    );
+    return str.startsWith('http') || str.startsWith('data:') || str.startsWith('/');
   };
 
   return (
@@ -127,33 +163,33 @@ export default function MyOrdersPage() {
         <div className="dashboard-main-content">
           <div className="dashboard-content">
             <div className="page-header">
-              <h1 className="page-title"><FiPackage size={28} /> طلباتي</h1>
+              <h1 className="page-title"><FiPackage size={28} /> {t('myOrders')}</h1>
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
                 className="btn btn-secondary"
               >
                 <FiRefreshCw style={isRefreshing ? { animation: 'spin 1s linear infinite' } : {}} />
-                {isRefreshing ? 'تحديث...' : 'تحديث'}
+                {isRefreshing ? t('refreshing') : t('refresh')}
               </button>
             </div>
 
             {loading && orders.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state-icon"><FiClock size={60} /></div>
-                <h2>جاري تحميل الطلبات...</h2>
+                <h2>{t('loadingOrders')}</h2>
               </div>
             ) : error ? (
               <div className="empty-state">
                 <div className="empty-state-icon"><FiAlertTriangle size={60} /></div>
                 <h2>{error}</h2>
-                <button className="btn btn-primary" onClick={handleRefresh}>إعادة المحاولة</button>
+                <button className="btn btn-primary" onClick={handleRefresh}>{t('refresh')}</button>
               </div>
             ) : orders.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state-icon"><FiPackage size={60} /></div>
-                <h2>لا توجد طلبات</h2>
-                <button className="btn btn-primary" onClick={() => navigate('/products')}>تصفح المنتجات</button>
+                <h2>{t('noOrders')}</h2>
+                <button className="btn btn-primary" onClick={() => navigate('/products')}>{t('browseProducts')}</button>
               </div>
             ) : (
               <div className="orders-list">
@@ -161,11 +197,13 @@ export default function MyOrdersPage() {
                   <div key={order.id || i} className="order-card glass-card">
                     <div className="order-header" onClick={() => setExpanded(expanded === i ? null : i)}>
                       <div>
-                        <p className="order-id">#{order.id?.slice(0,8)}</p>
+                        <p className="order-id">{t('orderId')}{order.id?.slice(0,8)}</p>
                         <p className="order-date">{formatDateSafe(order.createdAt)}</p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span className={`badge ${statusBadge(order.status)}`}>{order.statusText || 'قيد التجهيز'}</span>
+                        <span className={`badge ${statusBadge(order.status)}`}>
+                          {order.statusText || getStatusText(order.status)}
+                        </span>
                         <span className="order-total">${order.total || '0.00'}</span>
                         <FiChevronDown style={{ transform: expanded === i ? 'rotate(180deg)' : '' }} />
                       </div>
@@ -178,11 +216,13 @@ export default function MyOrdersPage() {
                               <div key={j} className="order-item">
                                 <span>
                                   {isImageUrl(item.image) ? (
-                                    <img src={item.image} alt={item.name}
+                                    <img
+                                      src={item.image}
+                                      alt={item.name}
                                       style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '6px' }}
                                       onError={(e) => {
                                         e.target.style.display = 'none';
-                                        e.target.nextSibling.style.display = 'inline';
+                                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'inline';
                                       }}
                                     />
                                   ) : null}
@@ -196,34 +236,51 @@ export default function MyOrdersPage() {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-muted">لا توجد عناصر</p>
+                          <p className="text-muted">{t('noItems')}</p>
                         )}
 
                         {order.customMessage && (
                           <div className="detail-section">
-                            <p>💌 رسالة: "{order.customMessage}"</p>
-                            {order.messageColor && <p>🎨 لون: {getColorName(order.messageColor)}</p>}
-                            {order.messagePlacement && <p>📍 مكان: {order.messagePlacement === 'card' ? 'بطاقة خارجية' : order.messagePlacement === 'ribbon' ? 'على الشريط' : 'داخل الباقة'}</p>}
+                            <p>💌 {t('message')}: "{order.customMessage}"</p>
+                            {order.messageColor && <p>🎨 {t('color')}: {getColorName(order.messageColor)}</p>}
+                            {order.messagePlacement && (
+                              <p>📍 {t('placement')}: {getPlacementText(order.messagePlacement)}</p>
+                            )}
                           </div>
                         )}
 
                         {order.selectedAddons?.length > 0 && (
                           <div className="detail-section">
-                            <p>✨ إضافات: {order.selectedAddons.map(a => getAddonLabel(a)).join('، ')}</p>
+                            <p>✨ {t('addons')}: {order.selectedAddons.map(a => getAddonLabel(a)).join('، ')}</p>
                           </div>
                         )}
 
                         {order.wrappingColor && (
                           <div className="detail-section">
-                            <p>🎁 لون التغليف: <span style={{ backgroundColor: order.wrappingColor, display: 'inline-block', width: '16px', height: '16px', borderRadius: '50%', verticalAlign: 'middle', margin: '0 6px', border: '1px solid #ffffff33' }} /> {getColorName(order.wrappingColor)}</p>
+                            <p>🎁 {t('wrappingColor')}: 
+                              <span style={{
+                                backgroundColor: order.wrappingColor,
+                                display: 'inline-block',
+                                width: '16px',
+                                height: '16px',
+                                borderRadius: '50%',
+                                verticalAlign: 'middle',
+                                margin: '0 6px',
+                                border: '1px solid #ffffff33'
+                              }} />
+                              {getColorName(order.wrappingColor)}
+                            </p>
                           </div>
                         )}
 
-                        <p className="detail-section">💳 {order.paymentMethod || 'غير محدد'} {order.transactionNumber && `| رقم العملية: ${order.transactionNumber}`}</p>
+                        <p className="detail-section">
+                          💳 {order.paymentMethod || t('unknown')}
+                          {order.transactionNumber && ` | ${t('transactionNumber')}: ${order.transactionNumber}`}
+                        </p>
 
                         {order.status === 'pending' && (
                           <button className="btn btn-danger" style={{ marginTop: '12px' }} onClick={() => openConfirmModal(order.id)}>
-                            <FiTrash2 /> إلغاء الطلب
+                            <FiTrash2 /> {t('cancelOrder')}
                           </button>
                         )}
                       </div>
@@ -241,13 +298,13 @@ export default function MyOrdersPage() {
         <div className="modal-overlay" onClick={closeConfirmModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', textAlign: 'center' }}>
             <FiAlertTriangle size={50} color="var(--warning)" />
-            <h3 style={{ color: 'var(--text-primary)', margin: '16px 0' }}>تأكيد الإلغاء</h3>
+            <h3 style={{ color: 'var(--text-primary)', margin: '16px 0' }}>{t('confirmCancelTitle')}</h3>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: '1.6' }}>
-              هل أنت متأكد من إلغاء هذا الطلب؟ لا يمكن التراجع.
+              {t('confirmCancelMessage')}
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button className="btn btn-danger" onClick={handleConfirmCancel}><FiTrash2 /> نعم</button>
-              <button className="btn btn-secondary" onClick={closeConfirmModal}>تراجع</button>
+              <button className="btn btn-danger" onClick={handleConfirmCancel}><FiTrash2 /> {t('yes')}</button>
+              <button className="btn btn-secondary" onClick={closeConfirmModal}>{t('cancel')}</button>
             </div>
           </div>
         </div>

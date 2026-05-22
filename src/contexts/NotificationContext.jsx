@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { useLanguage } from './LanguageContext';
 import { collection, query, where, onSnapshot, updateDoc, doc, writeBatch } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
@@ -13,6 +14,7 @@ export function useNotifications() {
 
 export function NotificationProvider({ children }) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -23,7 +25,6 @@ export function NotificationProvider({ children }) {
       return;
     }
 
-    // ✅ استعلام بدون orderBy لتجنب الحاجة لفهرس مركب
     const q = query(
       collection(db, 'notifications'),
       where('userId', '==', user.uid)
@@ -36,24 +37,23 @@ export function NotificationProvider({ children }) {
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate?.() || new Date(doc.data().createdAt)
         }))
-        // ✅ ترتيب تنازلي محلياً (الأحدث أولاً)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       
       setNotifications(list);
       setUnreadCount(list.filter(n => !n.read).length);
     }, (error) => {
-      console.error('فشل تحميل الإشعارات:', error);
+      console.error(t('notificationsLoadFailed'), error);
     });
 
     return () => unsubscribe();
-  }, [user?.uid]);
+  }, [user?.uid, t]);
 
   const markAsRead = async (notificationId) => {
     try {
       const ref = doc(db, 'notifications', notificationId);
       await updateDoc(ref, { read: true });
     } catch (err) {
-      console.error(err);
+      console.error(t('markAsReadFailed'), err);
     }
   };
 
@@ -65,7 +65,7 @@ export function NotificationProvider({ children }) {
     try {
       await batch.commit();
     } catch (err) {
-      console.error(err);
+      console.error(t('markAllAsReadFailed'), err);
     }
   };
 

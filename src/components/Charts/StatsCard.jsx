@@ -1,4 +1,8 @@
+import { useLanguage } from '../../contexts/LanguageContext';
+
 export default function StatsCard({ icon, value, label, color, bgColor, trend, variant = 'purple', sparkle }) {
+  const { t } = useLanguage();
+  
   const variants = {
     purple: 'variant-purple',
     gold: 'variant-gold',
@@ -23,7 +27,7 @@ export default function StatsCard({ icon, value, label, color, bgColor, trend, v
           <div className="stats-label">{label}</div>
           {trend && (
             <div className={`stats-trend ${trend > 0 ? 'up' : 'down'}`}>
-              {trend > 0 ? '📈' : '📉'} {Math.abs(trend)}% هذا الشهر
+              {trend > 0 ? '📈' : '📉'} {Math.abs(trend)}% {t('thisMonth')}
             </div>
           )}
         </div>

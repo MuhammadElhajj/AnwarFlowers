@@ -397,3 +397,46 @@
   }
 }
 
+
+/* Password input with toggle button */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  padding-right: 48px !important;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* RTL adjustment */
+[dir="rtl"] .password-toggle-btn {
+  left: auto;
+  right: 12px;
+}
+
+[dir="rtl"] .password-input {
+  padding-right: 16px !important;
+  padding-left: 48px !important;
+}

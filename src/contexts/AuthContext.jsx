@@ -11,8 +11,9 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from '../services/firebase';
-import emailjs from '@emailjs/browser'; // ✅ استيراد EmailJS
+import emailjs from '@emailjs/browser';
 import toast from 'react-hot-toast';
+import { useLanguage } from './LanguageContext';
 
 const AuthContext = createContext(null);
 
@@ -22,7 +23,7 @@ export function useAuth() {
   return context;
 }
 
-// ✅ دالة إرسال إيميل ترحيبي (تُستخدم داخلياً)
+// دالة إرسال إيميل ترحيبي (تبقى كما هي أو يمكن تحديث النص الثابت)
 const sendWelcomeEmail = (email, firstName) => {
   const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_2zwpqdx';
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_xxxxxxxx';
@@ -34,12 +35,13 @@ const sendWelcomeEmail = (email, firstName) => {
     message: 'شكراً لانضمامك إلى متجرنا! نتمنى لك تجربة ممتعة 🌸',
     site_name: 'Anwar Flowers',
     order_id: ''
-  }, publicKey).catch(e => console.warn('فشل إرسال الإيميل الترحيبي', e));
+  }, publicKey).catch(e => console.warn('Failed to send welcome email', e));
 };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage(); // استخدم الترجمة
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -53,7 +55,7 @@ export function AuthProvider({ children }) {
             localStorage.setItem('userRole', userData.role || 'user');
           } else {
             const newUserData = {
-              firstName: firebaseUser.displayName?.split(' ')[0] || 'مستخدم',
+              firstName: firebaseUser.displayName?.split(' ')[0] || t('guest'),
               lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
               email: firebaseUser.email,
               role: 'user',
@@ -71,7 +73,7 @@ export function AuthProvider({ children }) {
           }
           setUser(finalUser);
         } catch (err) {
-          console.warn('فشل جلب بيانات Firestore، استخدام بيانات Auth الأساسية:', err);
+          console.warn('Failed to fetch Firestore data, using basic auth:', err);
           const role = localStorage.getItem('userRole') || 'user';
           setUser({ ...firebaseUser, role });
         }
@@ -82,7 +84,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [t]);
 
   const loginWithGoogle = async () => {
     try {
@@ -105,19 +107,24 @@ export function AuthProvider({ children }) {
           ordersCount: 0,
           createdAt: new Date().toISOString()
         });
-        // ✅ إرسال إيميل ترحيبي للمستخدم الجديد عبر Google
         sendWelcomeEmail(result.user.email, result.user.displayName?.split(' ')[0]);
       } else {
         await setDoc(userRef, { lastLogin: new Date().toISOString() }, { merge: true });
       }
-      toast.success('مرحباً بك');
+      toast.success(t('welcomeGoogle'));
       return true;
     } catch (err) {
+      let errorMsg = t('loginFailed');
       if (err.code === 'auth/account-exists-with-different-credential') {
-        toast.error('هذا البريد مسجل بطريقة أخرى. يرجى استخدام البريد وكلمة المرور أولاً.');
+        errorMsg = t('accountExistsDifferentCredential');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        errorMsg = t('popupClosed');
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        errorMsg = t('popupCancelled');
       } else {
-        toast.error(err.message || 'فشل تسجيل الدخول');
+        errorMsg = err.message || t('loginFailed');
       }
+      toast.error(errorMsg);
       return false;
     }
   };
@@ -140,14 +147,21 @@ export function AuthProvider({ children }) {
         createdAt: new Date().toISOString()
       });
       await sendEmailVerification(result.user);
-
-      // ✅ إرسال إيميل ترحيبي بعد التسجيل بالبريد
       sendWelcomeEmail(email, firstName);
-
-      toast.success('تم إنشاء الحساب. يرجى التحقق من بريدك الإلكتروني.');
+      toast.success(t('welcomeRegistered'));
       return { needVerification: true, email };
     } catch (err) {
-      toast.error(err.message || 'فشل التسجيل');
+      let errorMsg = t('registerFailed');
+      if (err.code === 'auth/email-already-in-use') {
+        errorMsg = t('emailAlreadyInUse');
+      } else if (err.code === 'auth/weak-password') {
+        errorMsg = t('weakPassword');
+      } else if (err.code === 'auth/invalid-email') {
+        errorMsg = t('invalidEmail');
+      } else {
+        errorMsg = err.message || t('registerFailed');
+      }
+      toast.error(errorMsg);
       return false;
     }
   };
@@ -155,10 +169,26 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast.success('مرحباً بك');
+      toast.success(t('welcomeBack'));
       return true;
     } catch (err) {
-      toast.error(err.message || 'بيانات خاطئة');
+      let errorMsg = t('loginFailed');
+      if (err.code === 'auth/user-not-found') {
+        errorMsg = t('userNotFound');
+      } else if (err.code === 'auth/wrong-password') {
+        errorMsg = t('wrongPassword');
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMsg = t('tooManyRequests');
+      } else if (err.code === 'auth/user-disabled') {
+        errorMsg = t('accountDisabled');
+      } else if (err.code === 'auth/invalid-email') {
+        errorMsg = t('invalidEmail');
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMsg = t('networkError');
+      } else {
+        errorMsg = err.message || t('loginFailed');
+      }
+      toast.error(errorMsg);
       return false;
     }
   };
@@ -166,9 +196,9 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await signOut(auth);
-      toast.success('تم الخروج');
+      toast.success(t('logoutSuccess'));
     } catch (err) {
-      toast.error(err.message || 'فشل تسجيل الخروج');
+      toast.error(err.message || t('logoutFailed'));
     }
   };
 
@@ -177,9 +207,9 @@ export function AuthProvider({ children }) {
       const userRef = doc(db, "users", auth.currentUser.uid);
       await setDoc(userRef, data, { merge: true });
       setUser(prev => ({ ...prev, ...data }));
-      toast.success('تم التحديث');
+      toast.success(t('profileUpdated'));
     } catch (err) {
-      toast.error(err.message || 'فشل التحديث');
+      toast.error(err.message || t('profileUpdateFailed'));
     }
   };
 

@@ -37,17 +37,30 @@ const AdminChatPage = lazy(() => import('./components/Admin/AdminChatPage'));
 const AdminAddonsPage = lazy(() => import('./components/Admin/AdminAddonsPage'));
 const AdminNotificationsPage = lazy(() => import('./components/Admin/AdminNotificationsPage'));
 
-// ========== حماية المسارات ==========
+// ========== حماية المسارات (مع دعم loading) ==========
 function ProtectedRoute({ children }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const savedUser = localStorage.getItem('anwar_flowers_user');
-  if (!user && !savedUser) return <Navigate to="/" replace />;
+
+  // أثناء تحميل حالة المصادقة، لا نعيد توجيه المستخدم
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  if (!user && !savedUser) {
+    return <Navigate to="/" replace />;
+  }
   return children;
 }
 
 function AdminRoute({ children }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const role = user?.role || localStorage.getItem('userRole');
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
   if (!user || role !== 'admin') {
     return <Navigate to="/admin/login" replace />;
   }

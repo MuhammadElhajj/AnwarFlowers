@@ -6,7 +6,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import Header from '../components/Layout/Header';
 import { FiArrowLeft, FiShoppingCart, FiPackage, FiAlertTriangle, FiClock } from 'react-icons/fi';
-import img123 from '../assets/hero.jpg'; // صورة افتراضية
 import '../styles/pages/user-pages-shared.css';
 
 export default function ProductDetailPage() {
@@ -25,17 +24,17 @@ export default function ProductDetailPage() {
         if (docSnap.exists()) {
           setProduct({ id: docSnap.id, ...docSnap.data() });
         } else {
-          setError('المنتج غير موجود');
+          setError(t('productNotFound'));
         }
       } catch (err) {
         console.error(err);
-        setError('فشل تحميل المنتج');
+        setError(t('failedToLoadProduct'));
       } finally {
         setLoading(false);
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, t]);
 
   const getImageSrc = () => {
     if (!product?.image) return null;
@@ -58,7 +57,7 @@ export default function ProductDetailPage() {
           <div className="dashboard-main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
             <div className="empty-state">
               <div className="empty-state-icon"><FiClock size={60} /></div>
-              <h2>جاري تحميل المنتج...</h2>
+              <h2>{t('loadingProduct')}</h2>
             </div>
           </div>
         </div>
@@ -76,7 +75,7 @@ export default function ProductDetailPage() {
             <div className="empty-state">
               <div className="empty-state-icon"><FiAlertTriangle size={60} /></div>
               <h2>{error}</h2>
-              <Link to="/products" className="btn btn-primary">العودة للمنتجات</Link>
+              <Link to="/products" className="btn btn-primary">{t('backToProducts')}</Link>
             </div>
           </div>
         </div>
@@ -91,37 +90,32 @@ export default function ProductDetailPage() {
       <div className="dashboard-layout">
         <div className="dashboard-main-content">
           <div className="dashboard-content">
-            <Link to="/products" className="btn btn-secondary" style={{ marginBottom: '1.5rem' }}>
-              <FiArrowLeft /> العودة للمنتجات
+            <Link to="/products" className="btn btn-secondary product-detail-back-btn">
+              <FiArrowLeft /> {t('backToProducts')}
             </Link>
 
-            <div className="product-detail-card glass-card" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-              <div className="product-detail-image" style={{ flex: '1 1 300px', textAlign: 'center' }}>
+            <div className="product-detail-card glass-card">
+              <div className="product-detail-image">
                 {getImageSrc() ? (
                   <img
                     src={getImageSrc()}
                     alt={product.name}
-                    style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '12px' }}
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target.nextElementSibling.style.display = 'block';
+                      if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'block';
                     }}
                   />
                 ) : null}
-                <div style={{ display: getImageSrc() ? 'none' : 'block', fontSize: '80px' }}>
+                <div className="product-detail-fallback" style={{ display: getImageSrc() ? 'none' : 'block' }}>
                   <FiPackage size={80} />
                 </div>
               </div>
-              <div className="product-detail-info" style={{ flex: '1 1 300px' }}>
-                <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: '#fff' }}>{product.name}</h1>
-                {product.description && <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{product.description}</p>}
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>${product.price}</p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => addToCart(product)}
-                  style={{ marginTop: '1.5rem', padding: '12px 24px', fontSize: '1.1rem' }}
-                >
-                  <FiShoppingCart style={{ marginRight: '8px' }} /> {t('addToCart')}
+              <div className="product-detail-info">
+                <h1 className="product-detail-name">{product.name}</h1>
+                {product.description && <p className="product-detail-description">{product.description}</p>}
+                <p className="product-detail-price">${product.price}</p>
+                <button className="btn btn-primary add-to-cart-btn" onClick={() => addToCart(product)}>
+                  <FiShoppingCart /> {t('addToCart')}
                 </button>
               </div>
             </div>

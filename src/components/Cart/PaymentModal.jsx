@@ -1,31 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 import { FiX, FiCreditCard, FiDollarSign, FiCheck } from 'react-icons/fi';
 
 export default function PaymentModal({ total, onClose }) {
+  const { t } = useLanguage();
   const [method, setMethod] = useState('online');
   const [transactionNumber, setTransactionNumber] = useState('');
   const [loading, setLoading] = useState(false);
-  const { placeOrder, clearCart, calculateCost } = useCart(); // ✅ استدعاء calculateCost
+  const { placeOrder, calculateCost } = useCart();
   const navigate = useNavigate();
 
-  const costs = calculateCost(); // ✅ حساب التكاليف لمرة واحدة
+  const costs = calculateCost();
 
   const handleConfirm = async () => {
     if (method === 'online' && !transactionNumber) {
-      toast.error('أدخل رقم التحويل');
+      toast.error(t('transactionRequired'));
       return;
     }
     setLoading(true);
     await new Promise(r => setTimeout(r, 2000));
-    const order = await placeOrder(method === 'online' ? 'دفع إلكتروني' : 'الدفع عند الاستلام', transactionNumber);
+    const order = await placeOrder(
+      method === 'online' ? t('onlinePayment') : t('cashOnDelivery'),
+      transactionNumber
+    );
     setLoading(false);
     if (order) {
       onClose();
       navigate('/my-orders');
-      toast.success('🎉 تم الطلب بنجاح!');
+      toast.success(t('orderSuccess'));
     }
   };
 
@@ -33,59 +38,90 @@ export default function PaymentModal({ total, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">💳 الدفع</h2>
-          <button className="modal-close" onClick={onClose}><FiX size={20} /></button>
+          <h2 className="modal-title">{t('payment')}</h2>
+          <button className="modal-close" onClick={onClose} aria-label={t('close')}>
+            <FiX size={20} />
+          </button>
         </div>
 
-        {/* ✅ ملخص التكاليف */}
-        <div style={{ marginBottom: '20px', padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)' }}>
-          <div className="summary-row"><span>المنتجات ({costs.itemCount})</span><span>${costs.subtotal}</span></div>
+        <div className="payment-summary">
+          <div className="summary-row">
+            <span>{t('products')} ({costs.itemCount})</span>
+            <span>${costs.subtotal}</span>
+          </div>
           {costs.addonsCost > 0 && (
-            <div className="summary-row"><span>✨ الإضافات</span><span>${costs.addonsCost}</span></div>
+            <div className="summary-row">
+              <span>{t('addons')}</span>
+              <span>${costs.addonsCost}</span>
+            </div>
           )}
-          <div className="summary-row"><span>التوصيل</span><span>${costs.deliveryCost}</span></div>
-          <div className="summary-row"><span>التغليف</span><span>${costs.wrappingCost}</span></div>
-          <div className="summary-row"><span>الضريبة</span><span>${costs.tax}</span></div>
+          <div className="summary-row">
+            <span>{t('delivery')}</span>
+            <span>${costs.deliveryCost}</span>
+          </div>
+          <div className="summary-row">
+            <span>{t('wrapping')}</span>
+            <span>${costs.wrappingCost}</span>
+          </div>
+          <div className="summary-row">
+            <span>{t('tax')}</span>
+            <span>${costs.tax}</span>
+          </div>
           {costs.discountAmount > 0 && (
-            <div className="summary-row" style={{ color: 'var(--success)' }}>
+            <div className="summary-row discount">
               <span>🎫 {costs.discountLabel}</span>
               <span>-${costs.discountAmount}</span>
             </div>
           )}
-          <div className="summary-total" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '2px solid var(--accent)' }}>
-            <span>المجموع</span>
+          <div className="summary-total">
+            <span>{t('total')}</span>
             <span>${costs.total}</span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-          <button onClick={() => setMethod('online')}
-            className="product-btn" style={{ background: method === 'online' ? 'var(--gradient-primary)' : 'var(--bg-input)', color: method === 'online' ? '#fff' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <FiCreditCard size={20} /> دفع إلكتروني
-            {method === 'online' && <FiCheck size={18} style={{ marginRight: 'auto' }} />}
+        <div className="payment-methods">
+          <button
+            onClick={() => setMethod('online')}
+            className={`payment-method-btn ${method === 'online' ? 'active' : ''}`}
+          >
+            <FiCreditCard size={20} />
+            <span>{t('onlinePayment')}</span>
+            {method === 'online' && <FiCheck size={18} className="check-icon" />}
           </button>
-          <button onClick={() => setMethod('cod')}
-            className="product-btn" style={{ background: method === 'cod' ? 'var(--gradient-primary)' : 'var(--bg-input)', color: method === 'cod' ? '#fff' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <FiDollarSign size={20} /> الدفع عند الاستلام
-            {method === 'cod' && <FiCheck size={18} style={{ marginRight: 'auto' }} />}
+
+          <button
+            onClick={() => setMethod('cod')}
+            className={`payment-method-btn ${method === 'cod' ? 'active' : ''}`}
+          >
+            <FiDollarSign size={20} />
+            <span>{t('cashOnDelivery')}</span>
+            {method === 'cod' && <FiCheck size={18} className="check-icon" />}
           </button>
         </div>
 
         {method === 'online' && (
-          <div style={{ marginBottom: '24px' }}>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>payments@anwarflowers.com</p>
-            <input type="text" className="form-input" placeholder="رقم عملية التحويل"
-              value={transactionNumber} onChange={e => setTransactionNumber(e.target.value)} />
+          <div className="transaction-section">
+            <p className="transaction-info">{t('bankAccountInfo')}</p>
+            <input
+              type="text"
+              className="form-input"
+              placeholder={t('enterTransactionNumber')}
+              value={transactionNumber}
+              onChange={e => setTransactionNumber(e.target.value)}
+            />
           </div>
         )}
 
-        <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', marginBottom: '24px' }}>
-          <p style={{ fontWeight: 'bold', color: 'var(--accent)', fontSize: '18px' }}>المبلغ المطلوب: ${costs.total}</p>
+        <div className="amount-display">
+          <p>{t('requiredAmount', { amount: `$${costs.total}` })}</p>
         </div>
 
-        <button className="checkout-btn" onClick={handleConfirm} disabled={loading}
-          style={{ background: loading ? 'var(--text-tertiary)' : 'var(--success)' }}>
-          {loading ? '⏳ جاري...' : '✅ تأكيد الطلب'}
+        <button
+          className="confirm-order-btn"
+          onClick={handleConfirm}
+          disabled={loading}
+        >
+          {loading ? t('processing') : `✅ ${t('confirmOrder')}`}
         </button>
       </div>
     </div>

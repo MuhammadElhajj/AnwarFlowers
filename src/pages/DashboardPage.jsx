@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -6,16 +6,20 @@ import { useRewards } from '../contexts/RewardsContext';
 import { useCart } from '../contexts/CartContext';
 import { collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import toast from 'react-hot-toast';
 import StatsCard from '../components/Charts/StatsCard';
-import BarChart from '../components/Charts/BarChart';
-import StarRating from '../components/Charts/StarRating';
+import LazyOnViewport from '../components/Common/LazyOnViewport';
+import RecentOrdersTable from '../components/RecentOrdersTable';
 import {
   FiShoppingBag, FiDollarSign, FiStar, FiTrendingUp,
   FiClock, FiCheckCircle, FiPackage, FiArrowRight,
   FiAward, FiGift, FiBarChart2
 } from 'react-icons/fi';
 
-
+// تحميل كسول للمكونات الثقيلة (تظهر بعد التمرير)
+const BarChart = lazy(() => import('../components/Charts/BarChart'));
+const StarRating = lazy(() => import('../components/Charts/StarRating'));
+// const RecentOrdersTable = lazy(() => import('../components/RecentOrdersTable'));
 export default function DashboardPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -28,7 +32,7 @@ export default function DashboardPage() {
   const [showRewardsPanel, setShowRewardsPanel] = useState(false);
   const [timeFilter, setTimeFilter] = useState('all');
 
-  // جلب بيانات المستخدم الشخصية (نفس الكود بدون تغيير)
+  // جلب البيانات (نفس الكود الأصلي)
   useEffect(() => {
     if (!user) return;
 
@@ -72,7 +76,9 @@ export default function DashboardPage() {
         try {
           const ratingsSnap = await getDocs(collection(db, 'ratings'));
           ratings = ratingsSnap.docs.map(doc => doc.data());
-        } catch (e) { /* تجاهل */ }
+        } catch (e) {
+          console.warn('Failed to load ratings:', e);
+        }
 
         const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         ratings.forEach(r => { if (dist[r.rating] !== undefined) dist[r.rating]++; });
@@ -100,21 +106,24 @@ export default function DashboardPage() {
         setRecentOrders(filteredOrders.slice(0, 5));
         setRatingDist(dist);
       } catch (err) {
-        console.error('فشل تحميل بيانات الداشبورد:', err);
+        console.error(t('dataLoadFailed'), err);
+        toast.error(t('dataLoadFailed'));
       }
     };
 
     fetchMyDashboardData();
-  }, [user, timeFilter]);
+  }, [user, timeFilter, t]);
 
   const handleRate = async (star) => {
-    // نفس الكود بدون تغيير
-    if (!user || !user.uid) return;
+    if (!user || !user.uid) {
+      toast.error(t('loginRequired'));
+      return;
+    }
     try {
       const ratingsSnap = await getDocs(collection(db, 'ratings'));
       const alreadyRated = ratingsSnap.docs.some(doc => doc.data().userId === user.uid);
       if (alreadyRated) {
-        console.error('لقد قمت بالتقييم مسبقاً');
+        toast.error(t('alreadyRated'));
         return;
       }
 
@@ -138,23 +147,30 @@ export default function DashboardPage() {
         avgRating,
         totalRatings: ratings.length
       }));
+      toast.success(t('ratingSubmitted'));
     } catch (err) {
-      console.error('فشل تقديم التقييم:', err);
+      console.error(t('ratingFailed'), err);
+      toast.error(t('ratingFailed'));
     }
   };
 
   const handleApplyCouponFromDashboard = (coupon) => {
-    if (coupon.used) return;
+    if (coupon.used) {
+      toast.error(t('couponAlreadyUsed'));
+      return;
+    }
     applyCoupon(coupon.id);
     applyCouponToCart(coupon);
+    toast.success(t('couponApplied'));
   };
 
   const currentLevel = levels[level];
 
-  const statCards = stats ? [
+  // استخدام useMemo لتجنب إعادة حساب المصفوفة إلا عند الحاجة
+  const statCards = useMemo(() => stats ? [
     {
       icon: <FiShoppingBag size={22} />,
-      label: 'طلباتي',
+      label: t('myOrders'),
       value: stats.myOrders?.toLocaleString(),
       color: '#f59e0b',
       bgColor: 'rgba(245,158,11,0.15)',
@@ -164,7 +180,7 @@ export default function DashboardPage() {
     },
     {
       icon: <FiDollarSign size={22} />,
-      label: 'إنفاقي',
+      label: t('mySpending'),
       value: `$${Number(stats.totalRevenue).toLocaleString()}`,
       color: '#10b981',
       bgColor: 'rgba(16,185,129,0.15)',
@@ -174,7 +190,7 @@ export default function DashboardPage() {
     },
     {
       icon: <FiClock size={22} />,
-      label: 'معلقة',
+      label: t('pending'),
       value: stats.pendingOrders?.toLocaleString(),
       color: '#f97316',
       bgColor: 'rgba(249,115,22,0.15)',
@@ -184,7 +200,7 @@ export default function DashboardPage() {
     },
     {
       icon: <FiCheckCircle size={22} />,
-      label: 'مكتملة',
+      label: t('completed'),
       value: stats.completedOrders?.toLocaleString(),
       color: '#14b8a6',
       bgColor: 'rgba(20,184,166,0.15)',
@@ -194,7 +210,7 @@ export default function DashboardPage() {
     },
     {
       icon: <FiStar size={22} />,
-      label: 'تقييمات',
+      label: t('ratings'),
       value: `${stats.avgRating} (${stats.totalRatings})`,
       color: '#a855f7',
       bgColor: 'rgba(168,85,247,0.15)',
@@ -204,7 +220,7 @@ export default function DashboardPage() {
     },
     {
       icon: <FiAward size={22} />,
-      label: 'نقاطي',
+      label: t('myPoints'),
       value: points?.toLocaleString(),
       color: '#667eea',
       bgColor: 'rgba(102,126,234,0.15)',
@@ -212,75 +228,87 @@ export default function DashboardPage() {
       trend: 12,
       sparkle: '🏆'
     },
-  ] : [];
+  ] : [], [stats, points, t]);
 
-  const quickLinks = [
-    { path: '/products', icon: '🛍️', title: t('products') },
-    { path: '/cart', icon: '🛒', title: t('cart') },
-    { path: '/my-orders', icon: '📋', title: t('orders') },
-    { path: '/profile', icon: '👤', title: t('profile') },
-    { path: '/calculator', icon: '🧮', title: 'الحاسبة' },
+  const timeFilters = [
+    { key: 'all', label: t('all') },
+    { key: 'today', label: t('today') },
+    { key: 'week', label: t('week') },
+    { key: 'month', label: t('month') },
   ];
 
   const statusBadge = (status) => {
-    const map = { pending: 'badge-pending', confirmed: 'badge-confirmed', shipped: 'badge-shipped', delivered: 'badge-delivered', cancelled: 'badge-cancelled' };
+    const map = { 
+      pending: 'badge-pending', 
+      confirmed: 'badge-confirmed', 
+      shipped: 'badge-shipped', 
+      delivered: 'badge-delivered', 
+      cancelled: 'badge-cancelled' 
+    };
     return map[status] || 'badge-pending';
   };
 
-  const timeFilters = [
-    { key: 'all', label: 'الكل' },
-    { key: 'today', label: 'اليوم' },
-    { key: 'week', label: 'الأسبوع' },
-    { key: 'month', label: 'الشهر' },
-  ];
+  const getStatusText = (status) => {
+    const map = {
+      pending: t('pending'),
+      confirmed: t('confirmed'),
+      shipped: t('shipped'),
+      delivered: t('delivered'),
+      cancelled: t('cancelled')
+    };
+    return map[status] || t('processing');
+  };
 
   return (
     <div className="dashboard-page">
       <div className="dashboard-bg" />
 
       <div className="dashboard-layout">
-        {/* Main Content */}
         <div className="dashboard-main-content">
           <div className="dashboard-content">
-            {/* Welcome Card */}
+            {/* Welcome Card – يظهر فوراً */}
             <div className="welcome-card">
               <div className="welcome-text">
                 <h1>{t('welcome')}، {user?.firstName || user?.displayName?.split(' ')[0]}! 🌸</h1>
-                <p>متجر متخصص في أفخم بوكيهات الورد والهدايا المميزة.</p>
+                <p>{t('welcomeMessage')}</p>
                 <div className="welcome-meta-row">
                   {stats && (
-                    <div className="welcome-meta">📦 {stats.myOrders} طلبات | ⭐ {stats.avgRating} تقييم</div>
+                    <div className="welcome-meta">
+                      📦 {stats.myOrders} {t('orders')} | ⭐ {stats.avgRating} {t('rating')}
+                    </div>
                   )}
                   <div className="welcome-meta" onClick={() => setShowRewardsPanel(!showRewardsPanel)}>
-                    {currentLevel.icon} {currentLevel.name} | ⭐ {points.toLocaleString()} نقطة
+                    {currentLevel.icon} {currentLevel.name} | ⭐ {points.toLocaleString()} {t('pointsShort')}
                   </div>
                 </div>
               </div>
               <div className="welcome-icon">💐</div>
             </div>
 
-            {/* Rewards Quick Panel */}
+            {/* Rewards Panel – يظهر فقط عند الضغط (محمّل بشكل طبيعي لأنه ليس ثقيلاً) */}
             {showRewardsPanel && (
               <div className="rewards-quick-panel">
                 <div>
                   <h4 className="rewards-panel-title">
-                    <FiAward color={currentLevel.color} /> مستواك: {currentLevel.name}
+                    <FiAward color={currentLevel.color} /> {t('yourLevel')}: {currentLevel.name}
                   </h4>
                   <div className="sidebar-progress-bar">
                     <div className="sidebar-progress-fill" style={{ width: `${progressPercent()}%` }} />
                   </div>
                   <p className="progress-text">
-                    {ordersCount} طلبات | {pointsToNextLevel() > 0 ? `${pointsToNextLevel()} طلبات للمستوى التالي` : '🎉 أعلى مستوى!'}
+                    {ordersCount} {t('orders')} | {pointsToNextLevel() > 0 
+                      ? `${pointsToNextLevel()} ${t('nextLevel')}` 
+                      : t('topLevel')}
                   </p>
                 </div>
 
                 <div>
                   <h4 className="rewards-panel-title">
-                    <FiGift color="#f59e0b" /> كوبوناتك ({coupons.filter(c => !c.used).length})
+                    <FiGift color="#f59e0b" /> {t('yourCoupons')} ({coupons.filter(c => !c.used).length})
                   </h4>
                   <div className="coupons-list">
                     {coupons.filter(c => !c.used).length === 0 ? (
-                      <p className="no-coupons-text">🛍️ أكمل طلباتك للحصول على كوبونات</p>
+                      <p className="no-coupons-text">{t('completeOrdersToGetCoupons')}</p>
                     ) : (
                       coupons.filter(c => !c.used).slice(0, 3).map(coupon => (
                         <div
@@ -293,7 +321,7 @@ export default function DashboardPage() {
                             <div className="coupon-name">{coupon.name}</div>
                             <div className="coupon-desc">{coupon.description}</div>
                             <div className={`coupon-status ${appliedCoupon?.id === coupon.id ? 'applied' : ''}`}>
-                              {appliedCoupon?.id === coupon.id ? '✅ مطبق' : '🎫 اضغط للتطبيق'}
+                              {appliedCoupon?.id === coupon.id ? `✅ ${t('applied')}` : `🎫 ${t('clickToApply')}`}
                             </div>
                           </div>
                         </div>
@@ -304,11 +332,11 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Stats Section */}
+            {/* Stats Cards – تظهر فوراً لأنها أساسية */}
             {stats && (
               <>
                 <div className="stats-section-header">
-                  <h3 className="stats-section-title">نشاطي</h3>
+                  <h3 className="stats-section-title">{t('myActivity')}</h3>
                   <div className="stats-section-filter">
                     {timeFilters.map(filter => (
                       <button
@@ -327,7 +355,7 @@ export default function DashboardPage() {
               </>
             )}
 
-            {/* Overview Container */}
+            {/* Overview Container – يتم تحميل المحتوى الثقيل فقط عند التمرير */}
             {stats && (
               <div className="overview-container">
                 <div className="overview-header">
@@ -336,8 +364,8 @@ export default function DashboardPage() {
                       <FiBarChart2 size={22} />
                     </div>
                     <div>
-                      <h3 className="overview-title">تحليلاتي</h3>
-                      <p className="overview-subtitle">إحصائيات وتقييمات</p>
+                      <h3 className="overview-title">{t('myAnalytics')}</h3>
+                      <p className="overview-subtitle">{t('statsAndRatings')}</p>
                     </div>
                   </div>
                   <div className="overview-filters">
@@ -361,29 +389,33 @@ export default function DashboardPage() {
                       <div className="overview-panel-icon orders">
                         <FiTrendingUp size={16} />
                       </div>
-                      <h4 className="overview-panel-title">طلباتي</h4>
+                      <h4 className="overview-panel-title">{t('myOrders')}</h4>
                     </div>
                     <div className="overview-mini-stats">
                       <div className="overview-mini-stat">
                         <div className="overview-mini-stat-value">{stats.pendingOrders}</div>
-                        <div className="overview-mini-stat-label">معلقة</div>
+                        <div className="overview-mini-stat-label">{t('pending')}</div>
                       </div>
                       <div className="overview-mini-stat">
                         <div className="overview-mini-stat-value">{stats.completedOrders}</div>
-                        <div className="overview-mini-stat-label">مكتملة</div>
+                        <div className="overview-mini-stat-label">{t('completed')}</div>
                       </div>
                       <div className="overview-mini-stat">
                         <div className="overview-mini-stat-value">{stats.myOrders}</div>
-                        <div className="overview-mini-stat-label">الإجمالي</div>
+                        <div className="overview-mini-stat-label">{t('total')}</div>
                       </div>
                     </div>
-                    <div className="overview-chart-area">
-                      <BarChart data={[
-                        { label: 'معلقة', value: stats.pendingOrders, color: '#f97316' },
-                        { label: 'مكتملة', value: stats.completedOrders, color: '#10b981' },
-                        { label: 'كل الطلبات', value: stats.myOrders, color: '#667eea' },
-                      ]} />
-                    </div>
+                    
+                    {/* بار تشارت – تحميل كسول عند التمرير */}
+                    <LazyOnViewport fallback={<div className="chart-placeholder" style={{ height: 200, background: 'rgba(255,255,255,0.05)', borderRadius: 12 }} />}>
+                      <Suspense fallback={<div className="chart-placeholder" style={{ height: 200, background: 'rgba(255,255,255,0.05)', borderRadius: 12 }} />}>
+                        <BarChart data={[
+                          { label: t('pending'), value: stats.pendingOrders, color: '#f97316' },
+                          { label: t('completed'), value: stats.completedOrders, color: '#10b981' },
+                          { label: t('allOrders'), value: stats.myOrders, color: '#667eea' },
+                        ]} />
+                      </Suspense>
+                    </LazyOnViewport>
                   </div>
 
                   <div className="overview-panel">
@@ -391,7 +423,7 @@ export default function DashboardPage() {
                       <div className="overview-panel-icon rating">
                         <FiStar size={16} />
                       </div>
-                      <h4 className="overview-panel-title">تقييمات المتجر</h4>
+                      <h4 className="overview-panel-title">{t('storeRatings')}</h4>
                     </div>
                     <div className="rating-quick-summary">
                       <div className="rating-quick-avg">
@@ -403,7 +435,7 @@ export default function DashboardPage() {
                               color={i < Math.round(Number(stats.avgRating)) ? '#fbbf24' : 'rgba(255,255,255,0.2)'} />
                           ))}
                         </div>
-                        <div className="rating-quick-total">{stats.totalRatings} تقييم</div>
+                        <div className="rating-quick-total">{stats.totalRatings} {t('totalRatingsCount')}</div>
                       </div>
                       <div className="rating-quick-bars">
                         {[5, 4, 3, 2, 1].map(star => {
@@ -420,54 +452,78 @@ export default function DashboardPage() {
                         })}
                       </div>
                     </div>
-                    <StarRating
-                      rating={stats.avgRating}
-                      totalRatings={stats.totalRatings}
-                      distribution={ratingDist}
-                      onRate={handleRate}
-                    />
+                    
+                    {/* StarRating – تحميل كسول عند التمرير */}
+                    <LazyOnViewport fallback={<div className="rating-placeholder" style={{ height: 150, background: 'rgba(255,255,255,0.05)', borderRadius: 12 }} />}>
+                      <Suspense fallback={<div className="rating-placeholder" style={{ height: 150, background: 'rgba(255,255,255,0.05)', borderRadius: 12 }} />}>
+                        <StarRating
+                          rating={stats.avgRating}
+                          totalRatings={stats.totalRatings}
+                          distribution={ratingDist}
+                          onRate={handleRate}
+                        />
+                      </Suspense>
+                    </LazyOnViewport>
                   </div>
                 </div>
 
                 <div className="overview-footer">
                   <span className="overview-footer-text">
                     <span className="overview-footer-dot" />
-                    آخر تحديث: {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    {t('lastUpdate')}: {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   </span>
                   <span className="overview-footer-text">
-                    💰 إنفاقي: <strong className="revenue-strong">${Number(stats.totalRevenue).toLocaleString()}</strong>
+                    💰 {t('mySpending')}: <strong className="revenue-strong">${Number(stats.totalRevenue).toLocaleString()}</strong>
                   </span>
                 </div>
               </div>
             )}
 
-            {/* Recent Orders */}
+            {/* Recent Orders – تحميل كسول عند التمرير */}
             {recentOrders.length > 0 && (
-              <div className="recent-orders">
-                <div className="recent-orders-header">
-                  <h3 className="recent-orders-title"><FiPackage /> أحدث طلباتي</h3>
-                  <button className="view-all-btn" onClick={() => navigate('/my-orders')}>عرض الكل <FiArrowRight /></button>
-                </div>
-                <table className="recent-orders-table">
-                  <thead>
-                    <tr><th>رقم الطلب</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th></tr>
-                  </thead>
-                  <tbody>
-                    {recentOrders.map(order => (
-                      <tr key={order.id}>
-                        <td className="order-id">#{order.id}</td>
-                        <td className="order-amount">${Number(order.total).toLocaleString()}</td>
-                        <td><span className={`badge ${statusBadge(order.status)}`}>{order.statusText || 'قيد التجهيز'}</span></td>
-                        <td>{order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('ar-SA') : new Date(order.createdAt).toLocaleDateString('ar-SA')}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <LazyOnViewport fallback={<div className="recent-orders-placeholder" style={{ height: 300, background: 'rgba(255,255,255,0.05)', borderRadius: 24 }} />}>
+                <Suspense fallback={<div className="recent-orders-placeholder" style={{ height: 300, background: 'rgba(255,255,255,0.05)', borderRadius: 24 }} />}>
+                  <div className="recent-orders">
+                    <div className="recent-orders-header">
+                      <h3 className="recent-orders-title"><FiPackage /> {t('myLatestOrders')}</h3>
+                      <button className="view-all-btn" onClick={() => navigate('/my-orders')}>
+                        {t('viewAll')} <FiArrowRight />
+                      </button>
+                    </div>
+                    <table className="recent-orders-table">
+                      <thead>
+                        <tr>
+                          <th>{t('orderNumber')}</th>
+                          <th>{t('amount')}</th>
+                          <th>{t('status')}</th>
+                          <th>{t('date')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recentOrders.map(order => (
+                          <tr key={order.id}>
+                            <td className="order-id">#{order.id?.slice(0, 8)}</td>
+                            <td className="order-amount">${Number(order.total).toLocaleString()}</td>
+                            <td>
+                              <span className={`badge ${statusBadge(order.status)}`}>
+                                {order.statusText || getStatusText(order.status)}
+                              </span>
+                            </td>
+                            <td>
+                              {order.createdAt?.toDate 
+                                ? order.createdAt.toDate().toLocaleDateString('ar-SA') 
+                                : new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Suspense>
+              </LazyOnViewport>
             )}
           </div>
         </div>
-        {/* تم حذف Sidebar من هنا لأنه موجود في UserLayout */}
       </div>
     </div>
   );

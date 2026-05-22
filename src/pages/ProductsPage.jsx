@@ -9,18 +9,7 @@ import {
 } from 'react-icons/fi';
 import Header from '../components/Layout/Header';
 import Sidebar from '../components/Layout/Sidebar';
-import img123 from '../assets/hero.jpg'; // صورة احتياطية
 import '../styles/pages/user-pages-shared.css';
-
-// مصفوفة افتراضية (غير مستخدمة، للتوثيق)
-const defaultProducts = [
-  { id: 1, name: 'بوكيه ورد أحمر', price: 49.99, image: '🌹', description: '24 وردة حمراء طبيعية مع تغليف فاخر' },
-  { id: 2, name: 'بوكيه تيوليب', price: 39.99, image: '🌷', description: 'تيوليب هولندي ملون مع أوراق خضراء' },
-  { id: 3, name: 'أوركيد أبيض', price: 59.99, image: '🌸', description: 'نبتة أوركيد طبيعية في أصيص سيراميك' },
-  { id: 4, name: 'بوكيه منوع', price: 44.99, image: '💐', description: 'مجموعة متنوعة من الورود الموسمية' },
-  { id: 5, name: 'مجموعة هدايا', price: 79.99, image: '🎁', description: 'بوكيه + شوكولاتة + دبدوب' },
-  { id: 6, name: 'عباد الشمس', price: 34.99, image: '🌻', description: 'بوكيه عباد الشمس المشرق' },
-];
 
 export default function ProductsPage() {
   const { t } = useLanguage();
@@ -43,14 +32,14 @@ export default function ProductsPage() {
         }));
         setProducts(productsList);
       } catch (err) {
-        console.error('فشل جلب المنتجات من Firestore:', err);
-        setFetchError('تعذر تحميل المنتجات، يرجى المحاولة لاحقاً.');
+        console.error('Failed to fetch products from Firestore:', err);
+        setFetchError(t('failedToLoadProducts'));
       } finally {
         setIsLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [t]);
 
   const getImageSrc = (product) => {
     const img = product.image;
@@ -86,10 +75,10 @@ export default function ProductsPage() {
         <Header />
         <div className="dashboard-bg" />
         <div className="dashboard-layout">
-          <div className="dashboard-main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
+          <div className="dashboard-main-content loading-container">
             <div className="empty-state">
               <div className="empty-state-icon"><FiClock size={60} /></div>
-              <h2>جاري تحميل المنتجات...</h2>
+              <h2>{t('loadingProducts')}</h2>
               <div className="spinner" style={{ marginTop: '20px' }}>
                 <span className="loader" style={{
                   width: '40px', height: '40px',
@@ -115,11 +104,11 @@ export default function ProductsPage() {
         <Header />
         <div className="dashboard-bg" />
         <div className="dashboard-layout">
-          <div className="dashboard-main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
+          <div className="dashboard-main-content loading-container">
             <div className="empty-state">
               <div className="empty-state-icon"><FiAlertTriangle size={60} /></div>
               <h2>{fetchError}</h2>
-              <button className="btn btn-primary" onClick={() => window.location.reload()}>إعادة المحاولة</button>
+              <button className="btn btn-primary" onClick={() => window.location.reload()}>{t('retry')}</button>
             </div>
           </div>
           <Sidebar />
@@ -140,15 +129,14 @@ export default function ProductsPage() {
               <h1 className="page-title">
                 <FiGift size={28} /> {t('products')}
               </h1>
-              <div className="search-wrapper" style={{ position: 'relative' }}>
-                <FiSearch size={18} className="search-icon" style={{ position: 'absolute', top: '50%', left: '14px', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+              <div className="search-wrapper">
+                <FiSearch size={18} className="search-icon" />
                 <input
                   type="text"
                   className="products-search"
-                  placeholder={`${t('search')}...`}
+                  placeholder={t('searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  style={{ paddingLeft: '44px' }}
                 />
               </div>
             </div>
@@ -156,7 +144,7 @@ export default function ProductsPage() {
             {filtered.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state-icon"><FiShoppingCart size={60} /></div>
-                <h2>لا توجد منتجات مطابقة</h2>
+                <h2>{t('noMatchingProducts')}</h2>
               </div>
             ) : (
               <div className="products-grid">
@@ -173,9 +161,8 @@ export default function ProductsPage() {
                           alt={product.name}
                           onError={(e) => {
                             e.target.style.display = 'none';
-                            e.target.nextElementSibling.style.display = 'flex';
+                            if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex';
                           }}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       ) : null}
                       <span

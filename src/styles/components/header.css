@@ -1,5 +1,5 @@
 /* ========================================
-   Header - Fixed & Premium
+   Header - ثابت مع خلفية زجاجية وتجاوب كامل
    ======================================== */
 
 .main-header {
@@ -22,7 +22,7 @@
 }
 
 .header-inner {
-  max-width: 1300px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 28px;
   height: 100%;
@@ -31,6 +31,7 @@
   justify-content: space-between;
 }
 
+/* ========== اللوغو ========== */
 .header-logo {
   display: flex;
   align-items: center;
@@ -38,63 +39,56 @@
   cursor: pointer;
   text-decoration: none;
 }
-
-.header-logo-icon {
-  font-size: 30px;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.header-logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
-
-.header-logo:hover .header-logo-icon {
-  transform: scale(1.15) rotate(12deg);
-}
-
 .header-logo-text {
   font-size: 1.3rem;
   font-weight: 800;
   background: linear-gradient(135deg, #667eea, #a855f7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
+/* ========== التنقل الرئيسي ========== */
 .header-nav {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-
 .header-nav-btn {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   padding: 10px 18px;
   border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.65);
   transition: all 0.25s ease;
-  cursor: pointer;
   background: transparent;
   border: none;
+  cursor: pointer;
 }
-
 .header-nav-btn:hover {
   background: rgba(102, 126, 234, 0.12);
   color: #fff;
 }
-
 .header-nav-btn.active {
   background: rgba(102, 126, 234, 0.2);
   color: #fff;
   box-shadow: 0 0 20px rgba(102, 126, 234, 0.15);
 }
 
+/* ========== الأزرار الجانبية (أيقونات) ========== */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 .header-icon-btn {
   width: 42px;
   height: 42px;
@@ -103,18 +97,16 @@
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.6);
-  transition: all 0.25s ease;
-  position: relative;
-  cursor: pointer;
   background: transparent;
   border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
 }
-
 .header-icon-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
-
 .header-badge {
   position: absolute;
   top: 3px;
@@ -133,7 +125,7 @@
   border: 2px solid rgba(15, 12, 41, 0.9);
 }
 
-/* Dropdown Menu */
+/* ========== القائمة المنسدلة (للمستخدم) ========== */
 .header-dropdown {
   position: absolute;
   top: 100%;
@@ -149,12 +141,10 @@
   z-index: 200;
   animation: dropdownIn 0.2s ease;
 }
-
 @keyframes dropdownIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .header-dropdown-item {
   display: flex;
   align-items: center;
@@ -166,221 +156,108 @@
   cursor: pointer;
   transition: all 0.2s;
   width: 100%;
-  border: none;
-  background: none;
+  text-align: left;
 }
-
 .header-dropdown-item:hover {
   background: rgba(102, 126, 234, 0.15);
   color: #fff;
 }
-
 .header-dropdown-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);
   margin: 6px 0;
 }
 
-@media (max-width: 900px) {
-  .header-nav { display: none; }
-}
-
-@media (max-width: 600px) {
-  .header-inner { padding: 0 16px; }
-  .header-logo-text { font-size: 1.1rem; }
-}
-
-/* ========== Dropdown Menu ========== */
-
-
-/* إصلاح للجوال */
-.header-dropdown {
-  position: fixed;
-  top: 70px; /* تحت الهيدر */
-  right: auto;
-  left: 20px;
-  width: calc(100vw - 20px);
-  max-width: 300px;
-  margin-top: 0;
-  z-index: 9999; /* أعلى من الشريط السفلي */
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-}
-@media (max-width: 800px) {
-
-  [dir="ltr"] .header-dropdown {
-    right: 10px;
-    left: auto;
-  }
-}
-
-/* ========== إخفاء أيقونة السلة على الجوال ========== */
-@media (max-width: 800px) {
-  .cart-btn {
-    display: none !important;
-  }
-}
-
-/* إشعارات */
+/* ========== قائمة الإشعارات ========== */
 .notification-wrapper {
   position: relative;
 }
-
-.notification-bell {
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  cursor: pointer;
-  padding: 8px;
-  position: relative;
-  transition: color 0.2s;
-}
-
-.notification-bell:hover {
-  color: var(--accent);
-}
-
-.notification-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: #ef4444;
-  color: white;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
 .notification-dropdown {
   position: absolute;
-  top: 80px;
-  right: -240px;
+  top: 100%;
+  right: -20px;
   width: 320px;
   background: rgba(20, 20, 40, 0.95);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-  z-index: 1000;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  z-index: 200;
   overflow: hidden;
 }
-
 .notification-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-weight: 600;
   color: #fff;
 }
-
 .mark-all-btn {
   background: none;
   border: none;
   color: var(--accent);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-
 .notification-list {
   max-height: 300px;
   overflow-y: auto;
 }
-
 .notification-item {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: background 0.2s;
-  position: relative;
 }
-
-.notification-item:hover {
-  background: rgba(255,255,255,0.05);
-}
-
 .notification-item.unread {
   background: rgba(102, 126, 234, 0.1);
 }
-
 .notification-message {
   flex: 1;
-  font-size: 14px;
+  font-size: 0.8rem;
   color: #fff;
-  margin: 0;
 }
-
 .notification-time {
-  font-size: 11px;
+  font-size: 0.65rem;
   color: var(--text-tertiary);
-  white-space: nowrap;
 }
-
 .mark-read-btn {
   background: none;
   border: none;
   color: var(--text-tertiary);
   cursor: pointer;
-  padding: 4px;
 }
-
 .mark-read-btn:hover {
   color: var(--success);
 }
-
 .no-notifications {
   padding: 20px;
   text-align: center;
   color: var(--text-tertiary);
-  font-size: 14px;
 }
 
-
-
-/* ========== أيقونة اللغة - تصميم ناري ========== */
+/* ========== مبدل اللغة ========== */
 .language-switcher {
   position: relative;
 }
-
-/* زر العلم الأساسي */
 .lang-btn {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 14px;
   padding: 8px 12px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   gap: 6px;
 }
-
-.lang-btn:hover {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(102, 126, 234, 0.15));
-  border-color: rgba(168, 85, 247, 0.5);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
-  transform: translateY(-1px);
-}
-
-.current-lang-flag {
-  font-size: 1.4rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-/* القائمة المنسدلة */
 .lang-dropdown {
   position: absolute;
   top: calc(100% + 12px);
@@ -390,76 +267,54 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   padding: 8px;
-  min-width: 180px;
-  z-index: 1001;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(168, 85, 247, 0.2);
-  animation: dropdownIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: top right;
+  min-width: 150px;
+  z-index: 200;
 }
-
-@keyframes dropdownIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* أيقونة اللغة داخل القائمة */
 .lang-item {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border: none;
-  background: transparent;
-  color: #fff;
   border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
   width: 100%;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
 }
-
-.lang-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 3px;
-  background: linear-gradient(180deg, #a855f7, #667eea);
-  border-radius: 0 4px 4px 0;
-  transform: scaleY(0);
-  transition: transform 0.2s ease;
-}
-
-.lang-item:hover::before {
-  transform: scaleY(1);
-}
-
 .lang-item:hover {
   background: rgba(168, 85, 247, 0.15);
-  padding-left: 18px;
 }
-
 .lang-item.active {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(102, 126, 234, 0.2));
+  background: rgba(168, 85, 247, 0.25);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
 }
 
-.lang-item.active::before {
-  transform: scaleY(1);
+/* ========== استجابة ========== */
+@media (max-width: 900px) {
+  .header-nav {
+    display: none;
+  }
+  .header-inner {
+    padding: 0 16px;
+  }
 }
-
-.lang-item span {
-  font-size: 1.3rem;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+@media (max-width: 600px) {
+  .header-logo-text {
+    font-size: 1rem;
+  }
+  .cart-btn {
+    display: none !important; /* السلة تظهر في الشريط السفلي */
+  }
+  .lang-btn span {
+    display: none;
+  }
+  .lang-btn {
+    padding: 8px;
+  }
+  .notification-dropdown {
+    right: -60px;
+    width: 280px;
+  }
 }

@@ -23,6 +23,7 @@ import '../pages/checkout.css';
 import '../pages/profile.css';
 import '../pages/orders.css';
 import '../pages/registerpage.css';
+import '../pages/charts.css';
 
 // ========== Admin ==========
 import '../admin/admin-base.css';
@@ -37,4 +38,4 @@ import '../components/bottom-nav.css';
 
 // ========== Layout & Shared ==========
 import '../layout/user-layout.css';
-import '../pages/user-pages-shared.css';
+// import '../pages/user-pages-shared.css';

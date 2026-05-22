@@ -12,7 +12,7 @@ import {
 
 export default function MobileSidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
-  const { t, lang, setLang } = useLanguage();
+  const { t, lang, setLang, supportedLangs } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
   const { cartCount } = useCart();
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function MobileSidebar({ isOpen, onClose }) {
   const mainLinks = [
     { path: '/dashboard', icon: <FiGrid size={18} />, label: t('dashboard') },
     { path: '/products', icon: <FiPackage size={18} />, label: t('products') },
-    { path: '/calculator', icon: <FiLayers size={18} />, label: 'الحاسبة' },
+    { path: '/calculator', icon: <FiLayers size={18} />, label: t('calculator') },
   ];
 
   const accountLinks = [
@@ -51,7 +51,13 @@ export default function MobileSidebar({ isOpen, onClose }) {
             <FiGift size={22} className="mobile-sidebar-logo-icon" />
             <span className="mobile-sidebar-logo-text">{t('appName')}</span>
           </div>
-          <button className="mobile-sidebar-close" onClick={onClose}><FiX size={20} /></button>
+          <button 
+            className="mobile-sidebar-close" 
+            onClick={onClose}
+            aria-label={t('closeSidebar')}
+          >
+            <FiX size={20} />
+          </button>
         </div>
 
         <div className="mobile-sidebar-user">
@@ -65,38 +71,62 @@ export default function MobileSidebar({ isOpen, onClose }) {
         </div>
 
         <nav className="mobile-sidebar-nav">
-          <div className="mobile-nav-section-title">القائمة الرئيسية</div>
+          <div className="mobile-nav-section-title">{t('mainMenu')}</div>
           {mainLinks.map(link => (
-            <button key={link.path} className={`mobile-nav-item ${isActive(link.path) ? 'active' : ''}`}
-              onClick={() => navigate(link.path)}>
+            <button 
+              key={link.path} 
+              className={`mobile-nav-item ${isActive(link.path) ? 'active' : ''}`}
+              onClick={() => navigate(link.path)}
+              aria-label={link.label}
+            >
               {link.icon}
               {link.label}
             </button>
           ))}
 
-          <div className="mobile-nav-section-title">الحساب والطلبات</div>
+          <div className="mobile-nav-section-title">{t('accountAndOrders')}</div>
           {accountLinks.map(link => (
-            <button key={link.path} className={`mobile-nav-item ${isActive(link.path) ? 'active' : ''}`}
-              onClick={() => navigate(link.path)}>
+            <button 
+              key={link.path} 
+              className={`mobile-nav-item ${isActive(link.path) ? 'active' : ''}`}
+              onClick={() => navigate(link.path)}
+              aria-label={link.label}
+            >
               {link.icon} {link.label}
-              {link.badge > 0 && <span className="mobile-nav-badge">{link.badge}</span>}
+              {link.badge > 0 && <span className="mobile-nav-badge" aria-label={`${link.badge} ${t('items')}`}>{link.badge}</span>}
             </button>
           ))}
         </nav>
 
         <div className="mobile-sidebar-controls">
-          <button className="mobile-control-btn" onClick={toggleTheme}>
+          <button 
+            className="mobile-control-btn" 
+            onClick={toggleTheme}
+            aria-label={t('themeToggleLabel')}
+          >
             {isDark ? <FiSun size={16} /> : <FiMoon size={16} />}
-            {isDark ? 'الوضع النهاري' : 'الوضع الليلي'}
+            {isDark ? t('lightMode') : t('darkMode')}
           </button>
-          <select className="mobile-lang-select" value={lang} onChange={(e) => setLang(e.target.value)}>
-            <option value="ar">العربية</option>
-            <option value="en">English</option>
+          <select 
+            className="mobile-lang-select" 
+            value={lang} 
+            onChange={(e) => setLang(e.target.value)}
+            aria-label={t('languageSelectLabel')}
+          >
+            {supportedLangs.map(l => (
+              <option key={l.code} value={l.code}>
+                {t(l.code === 'ar' ? 'arabic' : l.code === 'en' ? 'english' : 'german')}
+              </option>
+            ))}
           </select>
         </div>
 
         <div className="mobile-sidebar-logout">
-          <button className="mobile-logout-btn" onClick={handleLogout}>
+          <button 
+            className="mobile-logout-btn" 
+            onClick={handleLogout}
+            aria-label={t('logout')}
+          >
             <FiLogOut size={16} /> {t('logout')}
           </button>
         </div>

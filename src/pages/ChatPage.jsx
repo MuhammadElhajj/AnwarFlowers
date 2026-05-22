@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   collection, addDoc, query, orderBy, onSnapshot,
   doc, updateDoc, serverTimestamp, getDoc, getDocs,
@@ -15,11 +16,12 @@ const EMOJI_LIST = ['😀','😂','😍','😢','😡','👍','👎','❤️','�
 
 export default function ChatPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState('');
   const [chatId, setChatId] = useState(null);
-  const [adminInfo, setAdminInfo] = useState({ name: 'المدير', photo: null, lastSeen: 'متصل الآن' });
+  const [adminInfo, setAdminInfo] = useState({ name: t('admin'), photo: null, lastSeen: t('online') });
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -44,11 +46,11 @@ export default function ChatPage() {
           setChatId(newChatRef.id);
         }
       } catch (err) {
-        console.error('فشل تهيئة الدردشة:', err);
+        console.error(t('chatInitFailed'), err);
       }
     };
     initChat();
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => {
     const fetchAdmin = async () => {
@@ -57,15 +59,15 @@ export default function ChatPage() {
         if (adminSnap.exists()) {
           const data = adminSnap.data();
           setAdminInfo({
-            name: data.firstName + ' ' + data.lastName || 'المدير',
+            name: (data.firstName + ' ' + data.lastName) || t('admin'),
             photo: data.profileImage || null,
-            lastSeen: 'متصل الآن'
+            lastSeen: t('online')
           });
         }
       } catch (e) {}
     };
     fetchAdmin();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -130,7 +132,7 @@ export default function ChatPage() {
       setShowEmoji(false);
       inputRef.current?.focus();
     } catch (err) {
-      console.error('فشل إرسال الرسالة:', err);
+      console.error(t('sendMessageFailed'), err);
     }
   };
 
@@ -149,18 +151,17 @@ export default function ChatPage() {
       <Header />
       <div className="dashboard-bg" />
 
-      {/* شريط الدردشة العلوي الثابت */}
       <div className="whatsapp-chat-header chat-header-fixed">
         <button
           className="chat-back-btn"
           onClick={() => navigate(-1)}
-          aria-label="رجوع"
+          aria-label={t('back')}
         >
           <FiArrowLeft size={22} />
         </button>
         <div className="whatsapp-chat-avatar">
           {adminInfo.photo ? (
-            <img src={adminInfo.photo} alt="المدير" />
+            <img src={adminInfo.photo} alt={t('admin')} />
           ) : (
             <div className="avatar-placeholder">
               <FiGift size={24} />
@@ -173,12 +174,9 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* منطقة الرسائل */}
       <div className="whatsapp-messages-area">
         {messages.length === 0 && (
-          <p className="empty-chat-message">
-            أرسل رسالة لبدء المحادثة
-          </p>
+          <p className="empty-chat-message">{t('startConversation')}</p>
         )}
         {messages.map(m => (
           <div
@@ -192,12 +190,12 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* شريط الإدخال */}
       <div className="whatsapp-input-area chat-input-fixed">
         <button
           className="emoji-toggle-btn"
           onClick={() => setShowEmoji(!showEmoji)}
           type="button"
+          aria-label={t('emoji')}
         >
           <FiSmile size={22} />
         </button>
@@ -207,11 +205,11 @@ export default function ChatPage() {
           className="whatsapp-input"
           value={newMsg}
           onChange={e => setNewMsg(e.target.value)}
-          placeholder="اكتب رسالة..."
+          placeholder={t('typeMessage')}
           onKeyDown={e => e.key === 'Enter' && sendMessage()}
         />
         {newMsg.trim() ? (
-          <button className="send-btn" onClick={sendMessage} type="button">
+          <button className="send-btn" onClick={sendMessage} type="button" aria-label={t('send')}>
             <FiSend size={20} />
           </button>
         ) : null}
